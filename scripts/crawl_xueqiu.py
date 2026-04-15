@@ -25,7 +25,7 @@ XUEQIU_USER_ID = "5497652514"
 
 # 雪球Cookie (登录后从浏览器复制)
 # 优先级: 命令行参数 > 环境变量 > 这里配置的默认值
-COOKIE = os.environ.get("XUEQIU_COOKIE", "e3118a66020384f18b8fdae7f409604396bae918")
+COOKIE = os.environ.get("XUEQIU_COOKIE", "e3118a66020384f18b8fdae7f409604396bae918")  # 雪球认证Cookie
 
 # 输出目录
 OUTPUT_DIR = Path("raw/xueqiu")
