@@ -1,0 +1,107 @@
+name: 雪球爬取与网站更新
+
+on:
+  # 每周一凌晨2点自动执行
+  schedule:
+    - cron: '0 2 * * 1'
+  # 也支持手动触发
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: '执行模式'
+        required: true
+        default: 'incremental'
+        type: choice
+        options:
+          - incremental
+          - full
+
+env:
+  XUEQIU_USER_ID: "5497652514"
+
+jobs:
+  crawl:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 设置Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: 安装依赖
+        run: pip install requests beautifulsoup4
+
+      - name: 增量爬取雪球
+        if: github.event.inputs.mode != 'full'
+        env:
+          XUEQIU_COOKIE: ${{ secrets.XUEQIU_COOKIE }}
+        run: |
+          python3 scripts/crawl_xueqiu.py
+        shell: bash
+
+      - name: 全量爬取雪球
+        if: github.event.inputs.mode == 'full'
+        env:
+          XUEQIU_COOKIE: ${{ secrets.XUEQIU_COOKIE }}
+        run: |
+          python3 scripts/crawl_xueqiu.py --full
+        shell: bash
+
+      - name: 提交更新
+        run: |
+          git config --local user.name "Auto Crawler"
+          git config --local user.email "bot@example.com"
+
+          # 检查是否有变更
+          if git diff --quiet; then
+            echo "没有新内容，跳过提交"
+          else
+            git add raw/xueqiu/
+            git commit -m "自动更新雪球数据: $(date +'%Y-%m-%d %H:%M')"
+            git push
+            echo "✅ 已提交并推送更新"
+          fi
+
+  update-website:
+    needs: crawl
+    runs-on: ubuntu-latest
+    if: always() && needs.crawl.result != 'skipped'
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 设置Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: 更新网站数据
+        run: |
+          python3 scripts/update_website_data.py
+        shell: bash
+
+      - name: 提交网站更新
+        run: |
+          git config --local user.name "Auto Crawler"
+          git config --local user.email "bot@example.com"
+
+          if git diff --quiet website/; then
+            echo "网站数据无变化"
+          else
+            git add website/
+            git commit -m "更新网站数据: $(date +'%Y-%m-%d')"
+            git push
+          fi
+
+      - name: 触发 Vercel 部署
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          working-directory: website
