@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>主题分类 - 段永平投资知识库</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>段永平投资知识库</h1>
+            <p class="subtitle">投资大佬思维框架 | 多维度索引</p>
+        </div>
+    </header>
+
+    <nav>
+        <div class="container">
+            <a href="index.html">首页</a>
+            <a href="cases.html">公司点评与案例</a>
+            <a href="topics.html" class="active">主题分类</a>
+            <a href="quotes.html">经典语录</a>
+            <a href="framework.html">决策框架</a>
+            <a href="puts.html">Put交易</a>
+        </div>
+    </nav>="puts.html">Put交易</a>
+        </div>
+    </nav>
+
+    <main class="container">
+        <a href="index.html" class="back-link">← 返回首页</a>
+
+        <section>
+            <h2>投资主题索引</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                按投资主题分类，涵盖段永平的核心投资理念和思维框架。
+            </p>
+
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="搜索主题..." onkeyup="filterTopics()">
+            </div>
+
+            <div class="topic-grid" id="topicGrid">
+                <!-- 主题卡片将通过JavaScript动态生成 -->
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>段永平投资知识库 | 基于 Karpathy llm-wiki 方法论构建</p>
+            <p class="small">最后更新：2026-04-14</p>
+        </div>
+    </footer>
+
+    <script>
+        // 主题数据
+        const topics = [
+            {
+                name: "投资理念",
+                mentions: 1986,
+                description: "买股票就是买公司，买公司就是买未来现金流折现。这是段永平投资哲学的核心。",
+                keyPoints: ["股票是企业所有权", "未来现金流折现", "长期投资", "价值投资"]
+            },
+            {
+                name: "能力圈",
+                mentions: 2108,
+                description: "只投资自己真正懂的公司。不懂的东西坚决不碰，能力圈大小不重要，重要的是知道边界在哪里。",
+                keyPoints: ["不懂不做", "知道自己不知道", "扩大能力圈要谨慎", "专注"]
+            },
+            {
+                name: "估值",
+                mentions: 1730,
+                description: "估值是艺术，不是科学。用DCF思维毛估估，不需要精确数字，重要的是模糊的正确。",
+                keyPoints: ["现金流折现", "PE/PB参考", "安全边际", "模糊正确"]
+            },
+            {
+                name: "安全边际",
+                mentions: 1406,
+                description: "用低于价值的价格买入，为判断错误留出容错空间。一般要求30%以上的安全边际。",
+                keyPoints: ["折扣买入", "容错空间", "风险控制", "逆向投资"]
+            },
+            {
+                name: "持仓管理",
+                mentions: 1066,
+                description: "集中投资于少数真正懂的公司。一般3-5家重仓，太分散反而降低收益。",
+                keyPoints: ["集中投资", "3-5家核心持仓", "闲钱投资", "不借钱"]
+            },
+            {
+                name: "风险控制",
+                mentions: 944,
+                description: "投资最重要的是不亏钱。不做空、不借钱、不做不懂的东西。",
+                keyPoints: ["不做空", "不借钱", "不止损(基本面没变)", "不投机"]
+            },
+            {
+                name: "护城河",
+                mentions: 683,
+                description: "好公司要有护城河保护，包括品牌、转换成本、网络效应、成本优势等。",
+                keyPoints: ["品牌护城河", "转换成本", "网络效应", "定价权"]
+            },
+            {
+                name: "企业文化",
+                mentions: 740,
+                description: "投资就是投人。看管理层是否本分、诚信、专注做该做的事。",
+                keyPoints: ["本分", "诚信", "专注", "长期导向"]
+            },
+            {
+                name: "Stop Doing List",
+                mentions: 669,
+                description: "知道自己不该做什么，比知道该做什么更重要。建立不为清单，坚决执行。",
+                keyPoints: ["不为清单", "及时止损", "不错的事情不做", "原则"]
+            },
+            {
+                name: "本分",
+                mentions: 600,
+                description: "做该做的事，不该赚的钱不赚。本分是段永平商业哲学的核心。",
+                keyPoints: ["诚信", "不占便宜", "长期主义", "消费者导向"]
+            },
+            {
+                name: "止损",
+                mentions: 360,
+                description: "发现错了要立刻停止，不管多大的代价都是最小的代价。",
+                keyPoints: ["发现错误立即改正", "沉没成本", "机会成本", "果断"]
+            },
+            {
+                name: "平常心",
+                mentions: 198,
+                description: "不为短期波动所动，不焦虑、不着急。投资是长期的事。",
+                keyPoints: ["耐心", "淡定", "不攀比", "专注过程"]
+            }
+        ];
+
+        // 生成主题卡片
+        function renderTopics(filter = '') {
+            const grid = document.getElementById('topicGrid');
+            const filtered = topics.filter(t =>
+                t.name.toLowerCase().includes(filter.toLowerCase()) ||
+                t.description.toLowerCase().includes(filter.toLowerCase())
+            );
+
+            grid.innerHTML = filtered.map(topic => `
+                <div class="topic-card" onclick="showTopicDetail('${topic.name}')">
+                    <h3>${topic.name}</h3>
+                    <p class="description">${topic.description}</p>
+                    <div class="mentions">提及 ${topic.mentions} 次</div>
+                </div>
+            `).join('');
+        }
+
+        // 搜索过滤
+        function filterTopics() {
+            const query = document.getElementById('searchInput').value;
+            renderTopics(query);
+        }
+
+        // 显示主题详情
+        function showTopicDetail(name) {
+            window.location.href = `topic-detail.html?topic=${encodeURIComponent(name)}`;
+        }
+
+        // 初始化
+        renderTopics();
+    </script>
+</body>
+</html>

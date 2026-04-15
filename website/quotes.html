@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>经典语录 - 段永平投资知识库</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>段永平投资知识库</h1>
+            <p class="subtitle">投资大佬思维框架 | 多维度索引</p>
+        </div>
+    </header>
+
+    <nav>
+        <div class="container">
+            <a href="index.html">首页</a>
+            <a href="cases.html">公司点评与案例</a>
+            <a href="topics.html">主题分类</a>
+            <a href="quotes.html" class="active">经典语录</a>
+            <a href="framework.html">决策框架</a>
+            <a href="puts.html">Put交易</a>
+        </div>
+    </nav>
+
+    <main class="container">
+        <a href="index.html" class="back-link">← 返回首页</a>
+
+        <section>
+            <h2>经典语录</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                从书籍、博客、帖子中精选的段永平投资语录。
+            </p>
+
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="搜索语录..." onkeyup="filterQuotes()">
+            </div>
+
+            <div class="filter-bar" id="filterBar">
+                <button class="filter-btn active" onclick="filterByTopic('all')">全部</button>
+                <button class="filter-btn" onclick="filterByTopic('投资理念')">投资理念</button>
+                <button class="filter-btn" onclick="filterByTopic('能力圈')">能力圈</button>
+                <button class="filter-btn" onclick="filterByTopic('平常心')">平常心</button>
+                <button class="filter-btn" onclick="filterByTopic('本分')">本分</button>
+                <button class="filter-btn" onclick="filterByTopic('风险')">风险控制</button>
+            </div>
+
+            <div class="quote-grid" id="quoteGrid">
+                <!-- 语录卡片将通过JavaScript动态生成 -->
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>段永平投资知识库 | 基于 Karpathy llm-wiki 方法论构建</p>
+            <p class="small">最后更新：2026-04-14</p>
+        </div>
+    </footer>
+
+    <script>
+        // 语录数据（精选）
+        const quotes = [
+            {
+                text: "我理解的投资归纳起来就是：买股票就是买公司，买公司就是买公司的未来现金流折现，句号！",
+                source: "投资逻辑篇",
+                topics: ["投资理念"]
+            },
+            {
+                text: "做对的事情，把事情做对！",
+                source: "投资逻辑篇",
+                topics: ["投资理念"]
+            },
+            {
+                text: "投资就是买未来现金流。所谓能看懂公司就是能看懂其未来现金流。",
+                source: "投资逻辑篇",
+                topics: ["投资理念", "能力圈"]
+            },
+            {
+                text: "不懂的东西不要碰。看不懂的公司就放在一边，等看懂了再说。",
+                source: "投资逻辑篇",
+                topics: ["能力圈"]
+            },
+            {
+                text: "知道自己的能力圈有多大往往比自己能力圈有多大要重要的多！",
+                source: "投资逻辑篇",
+                topics: ["能力圈"]
+            },
+            {
+                text: "不要轻易去'扩大'自己的能力圈。搞懂一个生意往往是需要很多年的。",
+                source: "投资逻辑篇",
+                topics: ["能力圈"]
+            },
+            {
+                text: "本分就是做该做的事，不该做的事坚决不做。",
+                source: "商业逻辑篇",
+                topics: ["本分"]
+            },
+            {
+                text: "本分的人不会去占别人的便宜，这是最基本的逻辑。",
+                source: "商业逻辑篇",
+                topics: ["本分"]
+            },
+            {
+                text: "平常心就是理性，就是不做傻事。",
+                source: "雪球问答",
+                topics: ["平常心"]
+            },
+            {
+                text: "我用三年不用的钱投资，所以不着急。",
+                source: "雪球问答",
+                topics: ["平常心", "风险控制"]
+            },
+            {
+                text: "不亏钱比赚钱更重要。",
+                source: "博客文章",
+                topics: ["风险控制"]
+            },
+            {
+                text: "买股票的时候要先看风险，再看回报。",
+                source: "投资逻辑篇",
+                topics: ["风险控制"]
+            },
+            {
+                text: "老巴的教导千万别忘了：不做空，不借钱，不做不懂的东西！",
+                source: "投资逻辑篇",
+                topics: ["风险控制"]
+            },
+            {
+                text: "做空是愚蠢的！",
+                source: "投资逻辑篇",
+                topics: ["风险控制"]
+            },
+            {
+                text: "宁可错过，不能做错。",
+                source: "雪球问答",
+                topics: ["风险控制"]
+            },
+            {
+                text: "好的生意模式往往具有很宽的护城河。",
+                source: "投资逻辑篇",
+                topics: ["护城河"]
+            },
+            {
+                text: "护城河实际上我觉得是生意模式中的一部分。",
+                source: "投资逻辑篇",
+                topics: ["护城河"]
+            },
+            {
+                text: "margin of safety 实际上应该指的是能力圈而不仅仅是价格。",
+                source: "投资逻辑篇",
+                topics: ["安全边际", "能力圈"]
+            },
+            {
+                text: "投资最重要的东西就是要有安全边际。",
+                source: "投资逻辑篇",
+                topics: ["安全边际"]
+            },
+            {
+                text: "用折扣价买入好公司。",
+                source: "投资逻辑篇",
+                topics: ["安全边际", "估值"]
+            },
+            {
+                text: "PE低不一定便宜，PE高不一定贵。关键看未来现金流。",
+                source: "雪球问答",
+                topics: ["估值"]
+            },
+            {
+                text: "估值是艺术，不是科学。毛估估就够了。",
+                source: "雪球问答",
+                topics: ["估值"]
+            },
+            {
+                text: "我发现我买的公司涨的时候我都卖的有点早。",
+                source: "雪球问答",
+                topics: ["持仓管理"]
+            },
+            {
+                text: "我一般持有 3-5 家公司，都是我很懂的。",
+                source: "雪球问答",
+                topics: ["持仓管理"]
+            },
+            {
+                text: "做对的事情实际上是通过不做不对的事情来实现的。",
+                source: "博客文章",
+                topics: ["Stop Doing List"]
+            },
+            {
+                text: "每个人都应该有自己的 stop doing list。",
+                source: "博客文章",
+                topics: ["Stop Doing List"]
+            },
+            {
+                text: "学巴菲特最重要和人们能够学的东西其实是他不做什么！",
+                source: "投资逻辑篇",
+                topics: ["Stop Doing List"]
+            },
+            {
+                text: "一旦发现是不正确的事情，就要马上停止，不管多大的代价往往都会是最小的代价。",
+                source: "投资逻辑篇",
+                topics: ["止损"]
+            },
+            {
+                text: "发现错了就改，越早改代价越小。",
+                source: "博客文章",
+                topics: ["止损"]
+            },
+            {
+                text: "其实每个人都多少知道自己能做什么，但往往不知道自己不该做什么。",
+                source: "投资逻辑篇",
+                topics: ["Stop Doing List"]
+            },
+            {
+                text: "我不对的地方就是平时不太研究宏观，也不觉得宏观有多重要。",
+                source: "雪球问答",
+                topics: ["投资理念"]
+            },
+            {
+                text: "别人恐慌的时候我也不会买，除非我看懂了这个公司。",
+                source: "雪球问答",
+                topics: ["平常心", "能力圈"]
+            },
+            {
+                text: "慢慢变富挺好的。",
+                source: "博客文章",
+                topics: ["平常心"]
+            },
+            {
+                text: "我从来没想过要赚快钱。",
+                source: "雪球问答",
+                topics: ["平常心"]
+            },
+            {
+                text: "投资没有捷径，只有慢慢学习。",
+                source: "博客文章",
+                topics: ["投资理念"]
+            },
+            {
+                text: "看十年比看一年容易，看五年比看一年容易。",
+                source: "雪球问答",
+                topics: ["投资理念"]
+            },
+            {
+                text: "企业就像一个黑盒子，里面的价值投资者能看到。",
+                source: "博客文章",
+                topics: ["投资理念"]
+            },
+            {
+                text: "买入的逻辑没变，股价越低越应该高兴。",
+                source: "雪球问答",
+                topics: ["平常心"]
+            },
+            {
+                text: "最危险的事情是用错误的方式赚钱。",
+                source: "博客文章",
+                topics: ["风险控制"]
+            },
+            {
+                text: "我不太关心宏观，但会关注对我投资的公司有影响的因素。",
+                source: "雪球问答",
+                topics: ["投资理念"]
+            }
+        ];
+
+        let currentFilter = 'all';
+
+        // 生成语录卡片
+        function renderQuotes(filter = 'all', search = '') {
+            const grid = document.getElementById('quoteGrid');
+
+            let filtered = quotes;
+
+            // 按主题过滤
+            if (filter !== 'all') {
+                filtered = filtered.filter(q => q.topics.includes(filter));
+            }
+
+            // 搜索过滤
+            if (search) {
+                filtered = filtered.filter(q =>
+                    q.text.toLowerCase().includes(search.toLowerCase())
+                );
+            }
+
+            if (filtered.length === 0) {
+                grid.innerHTML = '<div class="no-results">没有找到匹配的语录</div>';
+                return;
+            }
+
+            grid.innerHTML = filtered.map(quote => `
+                <div class="quote-card">
+                    <p class="text">${quote.text}</p>
+                    <p class="source">—— ${quote.source}</p>
+                    <div class="topics">
+                        ${quote.topics.map(t => `<span class="tag">${t}</span>`).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 按主题过滤
+        function filterByTopic(topic) {
+            currentFilter = topic;
+
+            // 更新按钮状态
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.textContent === (topic === 'all' ? '全部' : topic));
+            });
+
+            renderQuotes(topic, document.getElementById('searchInput').value);
+        }
+
+        // 搜索
+        function filterQuotes() {
+            const search = document.getElementById('searchInput').value;
+            renderQuotes(currentFilter, search);
+        }
+
+        // 初始化
+        renderQuotes();
+    </script>
+</body>
+</html>
