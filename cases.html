@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>公司点评与案例分析 - 段永平投资知识库</title>
     <link rel="stylesheet" href="css/style.css">
+    <script src="js/companyList.js"></script>
     <script src="js/companyData.js"></script>
 </head>
 <body>
@@ -215,9 +216,11 @@
 
         // ========== 公司数据处理 ==========
         function getCompanyList() {
-            return Object.keys(companyData).map(name => ({
+            // 优先使用轻量级的 companyList，如果不可用则使用 companyData
+            const dataSource = typeof companyList !== 'undefined' ? companyList : companyData;
+            return Object.keys(dataSource).map(name => ({
                 name: name,
-                ...companyData[name]
+                ...dataSource[name]
             }));
         }
 
