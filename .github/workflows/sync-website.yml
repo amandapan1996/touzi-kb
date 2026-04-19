@@ -1,0 +1,49 @@
+name: Sync Website to Public Repo
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Extract website files
+        run: |
+          # 确保只同步网站相关文件
+          mkdir -p public_site
+
+          # 复制网站文件
+          cp index.html public_site/
+          cp cases.html public_site/
+          cp companies.html public_site/
+          cp framework.html public_site/
+          cp puts.html public_site/
+          cp quotes.html public_site/
+
+          # 复制目录
+          cp -r css public_site/
+          cp -r js public_site/
+          cp -r data public_site/
+
+      - name: Create sync commit
+        run: |
+          cd public_site
+          git init
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add -A
+          git commit -m "Sync website files"
+
+      - name: Push to public repo
+        env:
+          GH_TOKEN: ${{ secrets.SYNC_TOKEN }}
+        run: |
+          git remote add public https://github.com/amandapan1996/touzi-kb.git
+          git push public HEAD:main --force
