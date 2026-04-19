@@ -5,6 +5,9 @@ on:
     branches: [main]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   sync:
     runs-on: ubuntu-latest
@@ -12,38 +15,28 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 1
 
       - name: Extract website files
         run: |
-          # 确保只同步网站相关文件
           mkdir -p public_site
+          cp index.html cases.html companies.html framework.html puts.html quotes.html public_site/
+          cp -r css js data public_site/
 
-          # 复制网站文件
-          cp index.html public_site/
-          cp cases.html public_site/
-          cp companies.html public_site/
-          cp framework.html public_site/
-          cp puts.html public_site/
-          cp quotes.html public_site/
-
-          # 复制目录
-          cp -r css public_site/
-          cp -r js public_site/
-          cp -r data public_site/
-
-      - name: Create sync commit
-        run: |
-          cd public_site
-          git init
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
-          git add -A
-          git commit -m "Sync website files"
-
-      - name: Push to public repo
+      - name: Sync to public repo
         env:
           GH_TOKEN: ${{ secrets.SYNC_TOKEN }}
         run: |
-          git remote add public https://x-access-token:$GH_TOKEN@github.com/amandapan1996/touzi-kb.git
-          git push public HEAD:main --force
+          cd public_site
+
+          # 初始化 git
+          git init
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+
+          # 添加所有文件
+          git add -A
+          git commit -m "Sync website files"
+
+          # 使用 Token 推送到公开仓库
+          git push https://$GH_TOKEN@github.com/amandapan1996/touzi-kb.git HEAD:main --force
