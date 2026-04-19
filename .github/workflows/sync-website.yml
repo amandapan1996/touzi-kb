@@ -45,5 +45,5 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.SYNC_TOKEN }}
         run: |
-          git remote add public https://github.com/amandapan1996/touzi-kb.git
+          git remote add public https://x-access-token:$GH_TOKEN@github.com/amandapan1996/touzi-kb.git
           git push public HEAD:main --force
