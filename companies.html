@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>公司评价 - 段永平投资知识库</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>段永平投资知识库</h1>
+            <p class="subtitle">投资大佬思维框架 | 多维度索引</p>
+        </div>
+    </header>
+
+    <nav>
+        <div class="container">
+            <a href="index.html">首页</a>
+            <a href="cases.html">公司点评与案例</a>
+            <a href="quotes.html">经典语录</a>
+            <a href="framework.html">决策框架</a>
+            <a href="puts.html">Put交易</a>
+        </div>
+    </nav>
+
+    <main class="container">
+        <a href="index.html" class="back-link">← 返回首页</a>
+
+        <!-- 公司列表视图 -->
+        <section id="companyList">
+            <h2>公司评价索引</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                按公司分类，查看段永平在各书籍/帖子中对每家公司的评价和分析。
+            </p>
+
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="搜索公司..." onkeyup="filterCompanies()">
+            </div>
+
+            <!-- 筛选标签 -->
+            <div class="filter-tags" style="margin: 15px 0;">
+                <span class="tag" onclick="filterByType('all')" style="cursor:pointer;">全部</span>
+                <span class="tag" onclick="filterByType('持仓公司')" style="cursor:pointer;">持仓</span>
+                <span class="tag" onclick="filterByType('历史持仓')" style="cursor:pointer;">历史持仓</span>
+                <span class="tag" onclick="filterByType('教训案例')" style="cursor:pointer;">教训</span>
+                <span class="tag" onclick="filterByType('案例分析')" style="cursor:pointer;">分析</span>
+                <span class="tag" onclick="filterByType('创业公司')" style="cursor:pointer;">创业</span>
+            </div>
+
+            <div class="company-grid" id="companyGrid">
+            </div>
+
+            <p style="color: var(--text-secondary); margin-top: 20px; font-size: 0.85rem;">
+                共收录 <strong id="totalCount">0</strong> 家公司，<strong id="totalQuotes">0</strong> 条相关语录
+            </p>
+        </section>
+
+        <!-- 公司详情视图 -->
+        <section id="companyDetail" style="display: none;">
+            <a href="javascript:showList()" class="back-link">← 返回公司列表</a>
+            <div id="detailContent"></div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>段永平投资知识库 | 基于 Karpathy llm-wiki 方法论构建</p>
+            <p class="small">最后更新：2026-04-15</p>
+        </div>
+    </footer>
+
+    <script src="js/companyData.js"></script>
+    <script>
+        // 公司卡片HTML模板
+        const typeColors = {
+            '持仓公司': '#2c5282',
+            '历史持仓': '#718096',
+            '教训案例': '#c53030',
+            '案例分析': '#805ad5',
+            '关注公司': '#38a169',
+            '创业公司': '#dd6b20',
+            '关联公司': '#d69e2e',
+            '早期创业': '#e53e3e',
+            '学习案例': '#667eea'
+        };
+
+        let currentFilter = 'all';
+
+        // 转换companyData为数组
+        function getCompanyArray() {
+            return Object.keys(companyData).map(name => ({
+                name: name,
+                ...companyData[name]
+            }));
+        }
+
+        // 计算总语录数
+        function getTotalQuotes() {
+            let total = 0;
+            Object.values(companyData).forEach(c => {
+                total += c.quoteCount || 0;
+            });
+            return total;
+        }
+
+        // 渲染公司卡片
+        function renderCompanies(filter = '', typeFilter = 'all') {
+            const grid = document.getElementById('companyGrid');
+            let companies = getCompanyArray();
+
+            // 应用搜索过滤
+            if (filter) {
+                companies = companies.filter(c =>
+                    c.name.toLowerCase().includes(filter.toLowerCase())
+                );
+            }
+
+            // 应用类型过滤
+            if (typeFilter !== 'all') {
+                companies = companies.filter(c => c.type === typeFilter);
+            }
+
+            // 按语录数量排序
+            companies.sort((a, b) => (b.quoteCount || 0) - (a.quoteCount || 0));
+
+            if (companies.length === 0) {
+                grid.innerHTML = '<div class="no-results">没有找到匹配的公司</div>';
+                return;
+            }
+
+            grid.innerHTML = companies.map(company => `
+                <div class="company-card" onclick="showCompanyDetail('${company.name}')">
+                    <h3>${company.name}</h3>
+                    ${company.symbol ? `<div class="mentions">${company.symbol}</div>` : ''}
+                    <div class="mentions">${company.quoteCount || 0} 条语录</div>
+                    <div style="margin: 8px 0;">
+                        <span class="tag" style="background: ${typeColors[company.type] || '#718096'}; color: white;">
+                            ${company.returnInfo || company.type}
+                        </span>
+                    </div>
+                    <div style="margin-top: 10px;">
+                        <span class="tag">${company.type}</span>
+                    </div>
+                </div>
+            `).join('');
+
+            // 更新统计
+            document.getElementById('totalCount').textContent = companies.length;
+        }
+
+        // 搜索过滤
+        function filterCompanies() {
+            const query = document.getElementById('searchInput').value;
+            renderCompanies(query, currentFilter);
+        }
+
+        // 类型过滤
+        function filterByType(type) {
+            currentFilter = type;
+            const query = document.getElementById('searchInput').value;
+            renderCompanies(query, type);
+        }
+
+        // 显示公司详情
+        function showCompanyDetail(name) {
+            const company = companyData[name];
+            if (!company) return;
+
+            document.getElementById('companyList').style.display = 'none';
+            document.getElementById('companyDetail').style.display = 'block';
+
+            const content = document.getElementById('detailContent');
+            const quotes = company.quotes || [];
+
+            // 按来源分组
+            const groupedQuotes = {};
+            quotes.forEach(q => {
+                const source = q.source || '未知来源';
+                if (!groupedQuotes[source]) {
+                    groupedQuotes[source] = [];
+                }
+                groupedQuotes[source].push(q);
+            });
+
+            // 来源排序（有时间信息的在前）
+            const sourceOrder = ['帖子合集', '博客文章合集', '投资逻辑篇', '商业逻辑篇'];
+            const sortedSources = Object.keys(groupedQuotes).sort((a, b) => {
+                const idxA = sourceOrder.indexOf(a);
+                const idxB = sourceOrder.indexOf(b);
+                if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+                if (idxA !== -1) return -1;
+                if (idxB !== -1) return 1;
+                return a.localeCompare(b);
+            });
+
+            // 生成来源分组HTML
+            const groupedHtml = sortedSources.map(source => {
+                const sourceQuotes = groupedQuotes[source];
+                const quotesHtml = sourceQuotes.map(q => {
+                    // 提取日期（如果存在）
+                    const dateMatch = q.quote.match(/\((\d{4}-\d{2}-\d{2})\)/);
+                    const date = dateMatch ? `<span class="quote-date">${dateMatch[1]}</span>` : '';
+                    const pageInfo = q.page ? ` 第${q.page}页` : '';
+
+                    return `
+                        <div class="quote-card" style="background: var(--bg-light); margin: 10px 0;">
+                            <p class="text">${q.quote.replace(/\(\d{4}-\d{2}-\d{2}\)/g, '').trim()}</p>
+                            <p class="source">—— ${source}${pageInfo}${date ? ' | ' + date : ''}</p>
+                        </div>
+                    `;
+                }).join('');
+
+                return `
+                    <div class="source-section">
+                        <h4>${source} <span class="count">(${sourceQuotes.length}条)</span></h4>
+                        <div class="source-quotes">
+                            ${quotesHtml}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            content.innerHTML = `
+                <div class="case-header">
+                    <h2>${name}</h2>
+                    <div class="case-meta">
+                        ${company.symbol ? `<span>股票代码：${company.symbol}</span>` : ''}
+                        <span>类型：${company.type}</span>
+                        <span>投资状态：${company.returnInfo || company.type}</span>
+                        <span>总语录：${quotes.length}条</span>
+                    </div>
+                </div>
+
+                <div class="case-content">
+                    <div style="margin-bottom: 30px;">
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;">
+                            <span class="tag" style="background: ${typeColors[company.type] || '#718096'}; color: white; padding: 6px 14px;">
+                                ${company.type}
+                            </span>
+                            <span class="tag" style="background: var(--primary); color: white; padding: 6px 14px;">
+                                ${company.returnInfo || company.type}
+                            </span>
+                        </div>
+                    </div>
+
+                    <h3>全部语录（共 ${quotes.length} 条）</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 20px; font-size: 0.9rem;">
+                        按来源分组，展示全部语录。日期标注在来源后面。
+                    </p>
+
+                    <div class="all-quotes">
+                        ${groupedHtml}
+                    </div>
+                </div>
+            `;
+
+            window.scrollTo(0, 0);
+        }
+
+        // 返回列表
+        function showList() {
+            document.getElementById('companyList').style.display = 'block';
+            document.getElementById('companyDetail').style.display = 'none';
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            renderCompanies();
+            document.getElementById('totalQuotes').textContent = getTotalQuotes();
+        });
+    </script>
+
+    <style>
+        .count {
+            font-weight: normal;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        .source-section {
+            margin-bottom: 30px;
+        }
+        .source-section h4 {
+            color: var(--primary);
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 8px;
+            margin-bottom: 15px;
+        }
+        .quote-date {
+            color: var(--accent);
+            font-weight: bold;
+        }
+        .all-quotes {
+            max-height: none;
+        }
+    </style>
+</body>
+</html>

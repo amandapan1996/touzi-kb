@@ -1,0 +1,1341 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>公司点评与案例分析 - 段永平投资知识库</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/companyData.js"></script>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>段永平投资知识库</h1>
+            <p class="subtitle">投资大佬思维框架 | 多维度索引</p>
+        </div>
+    </header>
+
+    <nav>
+        <div class="container">
+            <a href="index.html">首页</a>
+            <a href="cases.html" class="active">公司点评与案例</a>
+            <a href="quotes.html">经典语录</a>
+            <a href="framework.html">决策框架</a>
+            <a href="puts.html">Put交易</a>
+        </div>
+    </nav>
+
+    <main class="container">
+        <a href="index.html" class="back-link">← 返回首页</a>
+
+        <section>
+            <h2>公司点评与案例分析</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 15px;">
+                段永平的真实投资案例（含买入）和点评公司的分析思路：买入逻辑、持有原则、变化过程。
+            </p>
+
+            <!-- 持仓状态图例 -->
+            <div class="position-legend">
+                <span class="legend-item">
+                    <span class="legend-dot" style="background: #38a169;"></span>
+                    买入股票（主要持仓）
+                </span>
+                <span class="legend-item">
+                    <span class="legend-dot" style="background: #3182ce;"></span>
+                    卖出 Put（义务仓）
+                </span>
+                <span class="legend-item">
+                    <span class="legend-dot" style="background: #c53030;"></span>
+                    买入 Put（做空亏损/关注）
+                </span>
+                <span class="legend-item">
+                    <span class="legend-dot" style="background: #718096;"></span>
+                    点评关注
+                </span>
+                <span class="legend-item">
+                    <span class="legend-dot" style="background: #d69e2e;"></span>
+                    巴菲特案例学习
+                </span>
+            </div>
+
+            <!-- 公司类型筛选 -->
+            <div class="filter-section">
+                <div class="filter-tabs">
+                    <button class="tab-btn active" onclick="filterCompanies('all')">全部 <span id="count-all">0</span></button>
+                    <button class="tab-btn" onclick="filterCompanies('stock')">买入股票 <span id="count-stock">0</span></button>
+                    <button class="tab-btn" onclick="filterCompanies('put')">Put交易 <span id="count-put">0</span></button>
+                    <button class="tab-btn" onclick="filterCompanies('watching')">点评关注 <span id="count-watching">0</span></button>
+                    <button class="tab-btn" onclick="filterCompanies('lesson')">教训案例 <span id="count-lesson">0</span></button>
+                </div>
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="搜索公司..." onkeyup="searchCompanies()">
+                </div>
+            </div>
+        </section>
+
+        <!-- 公司列表视图 -->
+        <section id="companyList">
+            <div class="company-grid" id="companyGrid"></div>
+            <p style="color: var(--text-secondary); margin-top: 20px; font-size: 0.85rem;">
+                共收录 <strong id="totalCount">0</strong> 家公司
+            </p>
+        </section>
+
+        <!-- 公司详情视图 -->
+        <section id="companyDetail" style="display: none;">
+            <a href="javascript:showList()" class="back-link">← 返回公司列表</a>
+            <div id="detailContent"></div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>段永平投资知识库 | 基于 Karpathy llm-wiki 方法论构建</p>
+            <p class="small">最后更新：2026-04-15</p>
+        </div>
+        <div class="legal-notice">
+            <div class="container">
+                <div class="notice-box">
+                    <h4>法律声明</h4>
+                    <div class="notice-content">
+                        <p><strong>版权说明：</strong>本网站所引用内容（包括但不限于段永平先生的投资语录、商业观点、问答回复等）均整理自公开出版物，包括《段永平投资问答录（投资逻辑篇）》《段永平投资问答录（商业逻辑篇）》及段永平先生的博客、雪球发言等公开渠道。上述内容版权归相应原作者/出版方所有，本网站仅用于学习交流目的，如有侵权请联系删除。</p>
+                        <p><strong>免责声明：</strong>本网站内容仅供学习、研究和交流参考之用，不构成任何投资建议。投资有风险，入市需谨慎。本网站不对任何投资者依据本网站内容所作出的投资决策及可能产生的投资结果承担任何责任。任何人因使用本网站信息而直接或间接导致的任何损失，本网站概不负责。</p>
+                        <p class="disclaimer"><strong>⚠️ 重要提示：</strong>本页面内容不涉及且不构成任何投资建议。投资者应独立思考、自担风险。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // ========== 配置 ==========
+        const positionConfig = {
+            'stock': { icon: '📈', label: '买入股票', color: '#38a169', bg: '#e8f5e9', desc: '主要持仓' },
+            'sell-put': { icon: '💰', label: '卖出 Put', color: '#3182ce', bg: '#ebf8ff', desc: '义务仓' },
+            'put': { icon: '📉', label: '买入 Put', color: '#c53030', bg: '#ffebee', desc: '做空/关注' },
+            'watching': { icon: '👀', label: '关注点评', color: '#718096', bg: '#f7fafc', desc: '分析关注' },
+            'learning': { icon: '📚', label: '案例学习', color: '#d69e2e', bg: '#fffff0', desc: '巴菲特案例' },
+            'entrepreneur': { icon: '🏢', label: '创业公司', color: '#dd6b20', bg: '#fffaf0', desc: '自创企业' }
+        };
+
+        // 7个重点案例的详细分析数据
+        const caseAnalysisData = {
+            '网易': {
+                investmentProcess: [
+                    { stage: '关注', date: '2000年', desc: '做小霸王时理解游戏行业' },
+                    { stage: '买入股票', date: '2001-2002', desc: '互联网泡沫，股价跌至0.8美元，现金超过市值', price: '约$0.8/股' },
+                    { stage: '持有', date: '2002-2006', desc: '公司转型游戏成功，业绩爆发' },
+                    { stage: '部分减持', date: '2006年后', desc: '逐步变成历史持仓' }
+                ],
+                keyInsights: [
+                    '在能力圈内投资 - 做游戏出身，理解游戏行业',
+                    '极端低估时买入 - 现金超过市值',
+                    '风险可控 - 即使最坏情况也不会亏光',
+                    '敢重仓需要深入理解'
+                ]
+            },
+            '苹果': {
+                investmentProcess: [
+                    { stage: '关注', date: '2011年初', desc: '乔布斯去世，市场担忧苹果未来' },
+                    { stage: '首次买入', date: '2011-01-21', desc: '把去年赚的钱都放进去了', price: '约$44/股，市值约3000亿美元' },
+                    { stage: '持续买入', date: '2011年', desc: '越跌越买，认为苹果依然低PE高增长' },
+                    { stage: '持有', date: '2011-至今', desc: '逻辑不变就一直持有' }
+                ],
+                keyInsights: [
+                    '好的生意模式具有很宽的护城河',
+                    '买股票就是买公司未来现金流折现',
+                    '必须在能力圈内，只买自己懂的',
+                    '买入的逻辑没变，股价越低越应该高兴'
+                ]
+            },
+            '腾讯控股': {
+                investmentProcess: [
+                    { stage: '关注', date: '2015年底', desc: '看好微信的社交网络护城河' },
+                    { stage: '首次买入', date: '2015-12', desc: '开始买入腾讯', price: '一直没买是因为懒得调钱去香港' },
+                    { stage: '持有', date: '2015-至今', desc: '用平常心对待市场波动' }
+                ],
+                keyInsights: [
+                    '微信的社交网络护城河非常宽',
+                    '只要买入逻辑没变就一直持有',
+                    '用平常心对待短期波动'
+                ]
+            },
+            '贵州茅台': {
+                investmentProcess: [
+                    { stage: '关注', date: '2013年初', desc: '塑化剂风波后开始关注' },
+                    { stage: '首次买入', date: '2013-02', desc: '最近这段时间才开始买的', price: '当时茅台手里有200块钱现金' },
+                    { stage: '持有', date: '2013-至今', desc: '品牌护城河依然在' }
+                ],
+                keyInsights: [
+                    '买股票就是买公司，买公司就是买未来现金流',
+                    '先款后货的商业模式非常健康',
+                    '品牌护城河是最强的竞争优势',
+                    '管理层本分是投资前提'
+                ]
+            },
+            '阿里巴巴': {
+                investmentProcess: [
+                    { stage: '关注', date: '2010-2011', desc: '通过雅虎了解阿里' },
+                    { stage: '买入雅虎', date: '2010-2012', desc: '买雅虎是为了买淘宝和阿里巴巴集团', price: '雅虎持有阿里40%+股份' },
+                    { stage: '卖出雅虎', date: '2012年后', desc: '阿里上市后，溢价消失' }
+                ],
+                keyInsights: [
+                    '买雅虎是为了买淘宝和阿里巴巴集团',
+                    '对直接投资阿里有顾虑'
+                ]
+            },
+            '雅虎': {
+                investmentProcess: [
+                    { stage: '买入股票', date: '2010-2012', desc: '股价低于阿里持股价值', price: '雅虎持有阿里40%+股份' },
+                    { stage: '卖出', date: '2012年后', desc: '阿里上市后，溢价消失' }
+                ],
+                keyInsights: [
+                    '雅虎只是持有阿里的工具',
+                    '估值要动态看'
+                ]
+            },
+            '百度': {
+                investmentProcess: [
+                    { stage: '关注', date: '2010年', desc: '看到一些"不对"的东西' },
+                    { stage: '买入 Put', date: '2010年', desc: '开始做空百度', price: '后来被"夹空"' },
+                    { stage: '亏损', date: '2010年', desc: '股价不跌反涨，被迫止损', price: '亏损1.5-2亿美元' }
+                ],
+                keyInsights: [
+                    '做空是愚蠢的！',
+                    '老巴的教导千万别忘：不做空，不借钱，不做不懂的东西',
+                    '失去平常心就会做蠢事',
+                    '做空风险无限，代价惨重'
+                ]
+            }
+        };
+
+        // ========== 状态 ==========
+        let currentFilter = 'all';
+        let currentSearch = '';
+
+        // ========== 公司数据处理 ==========
+        function getCompanyList() {
+            return Object.keys(companyData).map(name => ({
+                name: name,
+                ...companyData[name]
+            }));
+        }
+
+        function getPositionStatus(company) {
+            // 根据 type 和 returnInfo 判断持仓状态
+            const type = company.type || '';
+            const returnInfo = company.returnInfo || '';
+
+            if (type === '持仓公司' || returnInfo.includes('长期持')) {
+                return 'stock';
+            }
+            if (type === '历史持仓') {
+                if (returnInfo.includes('100倍') || returnInfo.includes('已清仓')) {
+                    return 'stock';
+                }
+                return 'watching';
+            }
+            if (type === '教训案例') {
+                if (returnInfo.includes('做空')) {
+                    return 'put';
+                }
+                return 'lesson';
+            }
+            if (type === '创业公司' || type === '关联公司' || type === '早期创业') {
+                return 'entrepreneur';
+            }
+            if (type === '学习案例') {
+                return 'learning';
+            }
+            if (returnInfo.includes('Put') || returnInfo.includes('做空')) {
+                return 'put';
+            }
+            if (returnInfo.includes('间接持')) {
+                return 'stock';
+            }
+            return 'watching';
+        }
+
+        function countByCategory() {
+            const list = getCompanyList();
+            return {
+                all: list.length,
+                stock: list.filter(c => getPositionStatus(c) === 'stock').length,
+                put: list.filter(c => ['put', 'sell-put'].includes(getPositionStatus(c))).length,
+                watching: list.filter(c => ['watching', 'entrepreneur'].includes(getPositionStatus(c))).length,
+                lesson: list.filter(c => getPositionStatus(c) === 'lesson').length
+            };
+        }
+
+        // ========== 渲染 ==========
+        function renderCompanies() {
+            const grid = document.getElementById('companyGrid');
+            let companies = getCompanyList();
+
+            // 应用筛选
+            if (currentFilter !== 'all') {
+                if (currentFilter === 'stock') {
+                    companies = companies.filter(c => getPositionStatus(c) === 'stock');
+                } else if (currentFilter === 'put') {
+                    companies = companies.filter(c => ['put', 'sell-put'].includes(getPositionStatus(c)));
+                } else if (currentFilter === 'watching') {
+                    companies = companies.filter(c => ['watching', 'entrepreneur'].includes(getPositionStatus(c)));
+                } else if (currentFilter === 'lesson') {
+                    companies = companies.filter(c => getPositionStatus(c) === 'lesson');
+                }
+            }
+
+            // 应用搜索
+            if (currentSearch) {
+                companies = companies.filter(c =>
+                    c.name.toLowerCase().includes(currentSearch.toLowerCase())
+                );
+            }
+
+            // 按持仓状态和语录数排序
+            const priority = { 'stock': 0, 'sell-put': 1, 'put': 2, 'lesson': 3, 'watching': 4, 'entrepreneur': 5, 'learning': 6 };
+            companies.sort((a, b) => {
+                const pa = priority[getPositionStatus(a)] ?? 9;
+                const pb = priority[getPositionStatus(b)] ?? 9;
+                if (pa !== pb) return pa - pb;
+                return (b.quoteCount || 0) - (a.quoteCount || 0);
+            });
+
+            // 统计
+            document.getElementById('totalCount').textContent = companies.length;
+
+            if (companies.length === 0) {
+                grid.innerHTML = '<div class="no-results">没有找到匹配的公司</div>';
+                return;
+            }
+
+            grid.innerHTML = companies.map(company => {
+                const position = getPositionStatus(company);
+                const config = positionConfig[position] || positionConfig['watching'];
+                const hasDetail = caseAnalysisData[company.name];
+
+                return `
+                    <div class="company-card ${hasDetail ? 'has-detail' : ''}" onclick="showCompanyDetail('${company.name}')">
+                        <div class="card-header">
+                            <h3>${company.name}</h3>
+                            <span class="position-badge" style="background: ${config.bg}; color: ${config.color}; border: 1px solid ${config.color};">
+                                ${config.icon} ${config.label}
+                            </span>
+                        </div>
+                        ${company.symbol ? `<div class="symbol">${company.symbol}</div>` : ''}
+                        <div class="card-meta">
+                            <span class="quote-count">${company.quoteCount || 0} 条语录</span>
+                            <span class="type-tag">${company.type || '未分类'}</span>
+                        </div>
+                        <div class="return-info">${company.returnInfo || ''}</div>
+                        ${hasDetail ? '<div class="has-analysis">点击查看投资分析 →</div>' : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ========== 公司详情 ==========
+
+        // 公司关键词配置 - 用于过滤相关语录
+        const companyKeywords = {
+            '苹果': ['苹果', 'iPhone', 'iPad', 'Mac', '乔布斯', '库克', 'Apple'],
+            '网易': ['网易', '游戏', '丁磊', '魔兽', 'NetEase'],
+            '腾讯控股': ['腾讯', '微信', 'QQ', '马化腾', '社交'],
+            '贵州茅台': ['茅台', '飞天', '酱香', '白酒', '茅台酒'],
+            '阿里巴巴': ['阿里', '淘宝', '天猫', '马云', '阿里巴巴', '支付宝'],
+            '雅虎': ['雅虎', 'Yahoo', '杨致远'],
+            '百度': ['百度', '李彦宏', '搜索引擎', '竞价'],
+            '谷歌': ['谷歌', 'Google', '安卓', 'Alphabet'],
+            '通用电气': ['GE', '通用电气', '韦尔奇', '伊梅尔特'],
+            '雅虎日本': ['雅虎日本', 'Yahoo Japan'],
+            '阿里巴巴集团': ['阿里', '淘宝', '天猫', '马云', '阿里巴巴', '支付宝'],
+            '拼多多': ['拼多多', '黄峥', '社交电商', '多多'],
+            '腾讯音乐': ['腾讯音乐', 'QQ音乐', '酷狗', '酷我', '网易云音乐'],
+            'Zoom': ['Zoom', '视频会议', '远程办公', '袁征'],
+            '迪士尼': ['迪士尼', 'Disney', '漫威', '皮克斯'],
+            '特斯拉': ['特斯拉', 'Tesla', '马斯克', '电动车', '新能源'],
+            '台积电': ['台积电', 'TSMC', '半导体', '芯片制造'],
+            '英特尔': ['英特尔', 'Intel', '芯片', 'CPU', '摩尔'],
+            '百度': ['百度', '李彦宏', '搜索引擎']
+        };
+
+        // 检查语录是否与公司相关
+        function isQuoteRelevant(quoteText, companyName) {
+            const keywords = companyKeywords[companyName] || [companyName];
+            const text = quoteText.toLowerCase();
+
+            // 检查是否包含关键词
+            const hasKeyword = keywords.some(kw =>
+                text.includes(kw.toLowerCase())
+            );
+
+            // 如果没有关键词，检查是否是一般性投资讨论（保留）
+            // 这类语录通常在问答中出现，提问者问的是关于这个公司的问题
+            const generalKeywords = ['投资', '股票', '公司', '生意', '商业模式', '护城河', '本分', '平常心'];
+            const hasGeneral = generalKeywords.some(kw => text.includes(kw));
+
+            // 黑名单 - 明确是其他公司的语录
+            const blackList = [];
+            for (const [otherCompany, otherKeywords] of Object.entries(companyKeywords)) {
+                if (otherCompany !== companyName) {
+                    if (otherKeywords.some(kw => text.includes(kw.toLowerCase()))) {
+                        // 如果包含其他公司关键词，且不包含本公司关键词，可能是其他公司的
+                        if (!hasKeyword) {
+                            return false;
+                        }
+                    }
+                }
+            }
+
+            // 如果包含本公司关键词，或者是一般性讨论，保留
+            return hasKeyword || hasGeneral;
+        }
+
+        function showCompanyDetail(name) {
+            const company = companyData[name];
+            if (!company) return;
+
+            document.getElementById('companyList').style.display = 'none';
+            document.getElementById('companyDetail').style.display = 'block';
+
+            const position = getPositionStatus(company);
+            const config = positionConfig[position] || positionConfig['watching'];
+            const hasAnalysis = caseAnalysisData[name];
+            const allQuotes = company.quotes || [];
+
+            // 过滤出与公司相关的语录
+            const quotes = allQuotes.filter(q => isQuoteRelevant(q.text, name));
+
+            let detailHtml = `
+                <div class="case-header">
+                    <h2>${name} ${company.symbol ? `<span class="symbol">${company.symbol}</span>` : ''}</h2>
+                    <div class="case-meta">
+                        <span class="position-badge" style="background: ${config.bg}; color: ${config.color}; border: 1px solid ${config.color};">
+                            ${config.icon} ${config.label}
+                        </span>
+                        <span>类型：${company.type || '未分类'}</span>
+                        <span>投资状态：${company.returnInfo || '未明确'}</span>
+                        <span>相关语录：${quotes.length}条</span>
+                    </div>
+                </div>
+
+                <div class="case-content">
+            `;
+
+            // 如果有详细分析数据
+            if (hasAnalysis) {
+                const analysis = caseAnalysisData[name];
+
+                // 投资过程时间线
+                if (analysis.investmentProcess && analysis.investmentProcess.length > 0) {
+                    detailHtml += `
+                        <h3>投资过程</h3>
+                        <div class="investment-process">
+                            ${analysis.investmentProcess.map((step, idx) => {
+                                const stepConfig = positionConfig[
+                                    step.stage.includes('Put') ? (step.stage.includes('卖出') ? 'sell-put' : 'put') :
+                                    step.stage.includes('亏损') ? 'put' :
+                                    step.stage.includes('关注') || step.stage.includes('间接') ? 'watching' : 'stock'
+                                ] || positionConfig['watching'];
+                                return `
+                                    <div class="process-step">
+                                        <div class="step-number" style="background: ${stepConfig.color};">${idx + 1}</div>
+                                        <div class="step-content">
+                                            <div class="step-header">
+                                                <span class="step-stage" style="color: ${stepConfig.color};">${step.stage}</span>
+                                                ${step.date ? `<span class="step-date">${step.date}</span>` : ''}
+                                            </div>
+                                            <div class="step-desc">${step.desc}</div>
+                                            ${step.price ? `<div class="step-price">💰 ${step.price}</div>` : ''}
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    `;
+                }
+
+                // 关键洞见
+                if (analysis.keyInsights && analysis.keyInsights.length > 0) {
+                    detailHtml += `
+                        <h3>关键洞见</h3>
+                        <ul class="insights-list">
+                            ${analysis.keyInsights.map(insight => `<li>${insight}</li>`).join('')}
+                        </ul>
+                    `;
+                }
+            }
+
+            // 语录查看器
+            detailHtml += `
+                <h3>相关语录（共 ${quotes.length} 条）</h3>
+                <div class="quotes-section">
+                    <button class="quotes-toggle-btn" onclick="toggleQuotes(this)">
+                        <span class="quotes-count">点击展开语录</span>
+                        <span class="quotes-icon">▾</span>
+                    </button>
+                    <div class="quotes-panel" style="display: none;">
+                        <div class="quotes-search">
+                            <input type="text" placeholder="搜索语录..." oninput="filterQuotes(this.value)">
+                        </div>
+                        <div class="quotes-filters">
+                            <button class="filter-btn active" data-type="all" onclick="filterByType(this)">全部</button>
+                            <button class="filter-btn" data-type="qa" onclick="filterByType(this)">💬 问答形式</button>
+                            <button class="filter-btn" data-type="article" onclick="filterByType(this)">📝 博客文章</button>
+                        </div>
+                        <div class="quotes-filters quotes-sources">
+                            <span class="filter-label">来源：</span>
+                            <button class="filter-btn active" data-source="all" onclick="filterBySource(this)">全部</button>
+                            <button class="filter-btn" data-source="投资逻辑篇" onclick="filterBySource(this)">投资逻辑篇</button>
+                            <button class="filter-btn" data-source="商业逻辑篇" onclick="filterBySource(this)">商业逻辑篇</button>
+                            <button class="filter-btn" data-source="博客文章合集" onclick="filterBySource(this)">博客文章合集</button>
+                            <button class="filter-btn" data-source="帖子合集" onclick="filterBySource(this)">帖子合集</button>
+                        </div>
+                        <div class="quotes-toolbar">
+                            <span class="quotes-results-count">显示 10 / ${quotes.length} 条</span>
+                            <select class="quotes-sort" onchange="sortQuotes(this.value)">
+                                <option value="page">按页码</option>
+                                <option value="source">按来源</option>
+                            </select>
+                        </div>
+                        <div class="quotes-list"></div>
+                        <button class="quotes-load-more" onclick="loadMoreQuotes()">加载更多</button>
+                    </div>
+                </div>
+            `;
+
+            detailHtml += '</div>';
+
+            document.getElementById('detailContent').innerHTML = detailHtml;
+
+            // 初始化语录状态
+            window.currentCompanyQuotes = quotes;
+            window.filteredQuotes = [...quotes];
+            window.currentQuoteType = 'all';
+            window.currentQuoteSource = 'all';
+            window.currentQuoteSearch = '';
+            window.currentQuoteSort = 'page';
+            window.displayCount = 10;
+
+            window.scrollTo(0, 0);
+        }
+
+        // ========== 语录查看器功能 ==========
+        function toggleQuotes(btn) {
+            const panel = btn.nextElementSibling;
+            const isOpen = panel.style.display !== 'none';
+
+            if (isOpen) {
+                panel.style.display = 'none';
+                btn.querySelector('.quotes-icon').textContent = '▾';
+            } else {
+                panel.style.display = 'block';
+                btn.querySelector('.quotes-icon').textContent = '▴';
+                if (!panel.dataset.initialized) {
+                    renderQuotesList();
+                    panel.dataset.initialized = 'true';
+                }
+            }
+        }
+
+        function filterQuotes(searchText) {
+            window.currentQuoteSearch = searchText;
+            applyQuoteFilters();
+        }
+
+        function filterByType(btn) {
+            document.querySelectorAll('.quotes-filters .filter-btn[data-type]').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            window.currentQuoteType = btn.dataset.type;
+            applyQuoteFilters();
+        }
+
+        function filterBySource(btn) {
+            document.querySelectorAll('.quotes-sources .filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            window.currentQuoteSource = btn.dataset.source;
+            applyQuoteFilters();
+        }
+
+        function getQuoteType(text) {
+            // 判断是否为问答形式
+            if (text.includes('网友') && text.includes('段永平')) {
+                return 'qa';
+            }
+            return 'article';
+        }
+
+        function sortQuotes(sortType) {
+            window.currentQuoteSort = sortType;
+            applyQuoteFilters();
+        }
+
+        function applyQuoteFilters() {
+            let quotes = [...window.currentCompanyQuotes];
+
+            // 类型筛选
+            if (window.currentQuoteType && window.currentQuoteType !== 'all') {
+                quotes = quotes.filter(q => getQuoteType(q.text) === window.currentQuoteType);
+            }
+
+            // 来源筛选
+            if (window.currentQuoteSource && window.currentQuoteSource !== 'all') {
+                quotes = quotes.filter(q => q.source === window.currentQuoteSource);
+            }
+
+            // 搜索筛选
+            if (window.currentQuoteSearch) {
+                const search = window.currentQuoteSearch.toLowerCase();
+                quotes = quotes.filter(q => q.text.toLowerCase().includes(search));
+            }
+
+            // 排序
+            quotes.sort((a, b) => {
+                if (window.currentQuoteSort === 'page') {
+                    return (a.page || 0) - (b.page || 0);
+                } else {
+                    return (a.source || '').localeCompare(b.source || '');
+                }
+            });
+
+            window.filteredQuotes = quotes;
+            window.displayCount = 10;
+            renderQuotesList();
+        }
+
+        function renderQuotesList() {
+            const list = document.querySelector('.quotes-list');
+            if (!list) return;
+
+            const visibleQuotes = window.filteredQuotes.slice(0, window.displayCount);
+            const toolbar = document.querySelector('.quotes-toolbar');
+
+            if (toolbar) {
+                toolbar.querySelector('.quotes-results-count').textContent =
+                    `显示 ${visibleQuotes.length} / ${window.filteredQuotes.length} 条`;
+            }
+
+            // 过滤段永平介绍性文字
+            function filterIntro(text) {
+                // 简介模式：段永平后面的介绍性文字，包含多个头衔/成就
+                const introPatterns = [
+                    /段永平[：:]\s*著名[人生企业家]/g,
+                    /段永平[：:]\s*同时也是?著名[投资人企业]/g,
+                    /段永平[：:]\s*不管[是作]/g,
+                    /段永平[：:]\s*本期[雪球]/g,
+                    /段永平[：:]\s*著名[企业家投资人]/g,
+                    /段永平[：:]\s*[小创][a-zA-Z\u4e00-\u9fa5]+品牌[a-zA-Z\u4e00-\u9fa5]+/g,
+                ];
+
+                // 匹配 "段永平：xxx。" 格式的简介（xxx是对段永平的介绍）
+                // 通常简介包含 "企业家"、"创始人"、"投资人" 等关键词
+                const fullIntroPattern = /段永平[：:]([^。\n]*(?:著名|创始人|投资人|企业家|品牌)[^。\n]*(?:\。|$))/g;
+
+                let result = text;
+                let match;
+
+                // 移除整句简介 "段永平：xxx。" 格式
+                while ((match = fullIntroPattern.exec(text)) !== null) {
+                    const introText = match[1];
+                    // 如果简介较短（少于100字），认为是介绍性文字
+                    if (introText.length < 150) {
+                        result = result.replace(match[0], '段永平：');
+                    }
+                }
+
+                // 清理多余的冒号
+                result = result.replace(/段永平[：:]\s*[：:]/g, '段永平：');
+                // 移除仅有冒号后面是空白的情况
+                result = result.replace(/段永平[：:]\s*$/gm, '');
+
+                return result;
+            }
+
+            // 格式化问答语录 - 确保网友问题在段永平回答之前
+            function formatQAText(text) {
+                // 先过滤简介
+                text = filterIntro(text);
+
+                // 收集所有问答片段
+                const allMatches = [];
+                let match;
+
+                // 找网友问题 - 支持多种格式：
+                // "01.网友："、"网友："、"问："、"网友xxx："
+                const qPattern = /((?:\d+[\.、]?\s*)?(?:网友[^：:]*?|问)[：:])/g;
+                while ((match = qPattern.exec(text)) !== null) {
+                    allMatches.push({
+                        index: match.index,
+                        type: 'question',
+                        text: match[0],
+                        length: match[0].length
+                    });
+                }
+
+                // 找段永平回答
+                const aPattern = /段永平[：:]/g;
+                while ((match = aPattern.exec(text)) !== null) {
+                    allMatches.push({
+                        index: match.index,
+                        type: 'answer',
+                        text: match[0],
+                        length: match[0].length
+                    });
+                }
+
+                // 如果没有任何问答标记，返回原文
+                if (allMatches.length === 0) {
+                    return `<div class="qa-text">${text}</div>`;
+                }
+
+                // 按位置排序
+                allMatches.sort((a, b) => a.index - b.index);
+
+                // 重新配对：确保格式是「网友问 → 段永平答」
+                // 如果原始顺序是「段永平→网友」，需要交换
+                const qaPairs = [];
+                let i = 0;
+
+                while (i < allMatches.length) {
+                    const current = allMatches[i];
+
+                    if (current.type === 'question') {
+                        // 这是网友问题
+                        // 找下一个段永平回答
+                        const nextAnswerIdx = allMatches.findIndex((m, idx) => idx > i && m.type === 'answer');
+                        let qContent = text.substring(current.index + current.length,
+                            nextAnswerIdx !== -1 ? allMatches[nextAnswerIdx].index : text.length).trim();
+
+                        if (nextAnswerIdx !== -1) {
+                            // 有对应的段永平回答
+                            const answer = allMatches[nextAnswerIdx];
+                            const afterAnswerIdx = nextAnswerIdx + 1 < allMatches.length ? allMatches[nextAnswerIdx + 1].index : text.length;
+                            const aContent = text.substring(answer.index + answer.length, afterAnswerIdx).trim();
+                            qaPairs.push({ question: current, qContent, answer, aContent });
+                            i = nextAnswerIdx + 1;
+                        } else {
+                            // 只有问题，没有段永平回答
+                            qaPairs.push({ question: current, qContent, answer: null, aContent: '' });
+                            i++;
+                        }
+                    } else {
+                        // 这是段永平回答
+                        // 检查前一个配对是否已经有回答
+                        if (qaPairs.length > 0) {
+                            const lastPair = qaPairs[qaPairs.length - 1];
+                            if (lastPair.answer === null) {
+                                // 前一个网友问题没有回答，当前段永平就是它的回答
+                                // 检查这是否是「段永平→网友」的错位情况
+                                if (lastPair.question && current.index < lastPair.question.index) {
+                                    // 这是「段永平在前」的情况
+                                    // 段永平的内容是回答，02.网友是新的问题
+                                    const betweenText = text.substring(
+                                        current.index + current.length,
+                                        lastPair.question.index
+                                    ).trim();
+                                    // 把段永平的内容当作回答，02.网友当作问题
+                                    lastPair.answer = current;
+                                    lastPair.aContent = current.text + betweenText + (lastPair.qContent || '');
+                                    lastPair.qContent = '';
+                                    // 保留02.网友的问题内容作为下一个
+                                    const nextIndex = lastPair.question.index + lastPair.question.length;
+                                    const nextContent = text.substring(nextIndex,
+                                        allMatches[i + 1] ? allMatches[i + 1].index : text.length).trim();
+                                    // 当前段永平的回答已经用完，需要找下一个段永平
+                                    const nextAnswerIdx = allMatches.findIndex((m, idx) => idx > i && m.type === 'answer');
+                                    if (nextAnswerIdx !== -1) {
+                                        const nextAnswer = allMatches[nextAnswerIdx];
+                                        const nextAContent = text.substring(
+                                            nextAnswer.index + nextAnswer.length,
+                                            allMatches[nextAnswerIdx + 1] ? allMatches[nextAnswerIdx + 1].index : text.length
+                                        ).trim();
+                                        qaPairs.push({
+                                            question: lastPair.question,
+                                            qContent: betweenText + lastPair.question.text + nextContent,
+                                            answer: nextAnswer,
+                                            aContent: nextAnswer.text + nextAContent
+                                        });
+                                        // 删除原来的那个（已合并）
+                                        qaPairs.shift();
+                                        i = nextAnswerIdx + 1;
+                                    } else {
+                                        i++;
+                                    }
+                                } else {
+                                    // 正常情况：网友问题在前，段永平在后
+                                    lastPair.answer = current;
+                                    const nextIndex = i + 1 < allMatches.length ? allMatches[i + 1].index : text.length;
+                                    lastPair.aContent = current.text + text.substring(current.index + current.length, nextIndex).trim();
+                                    i++;
+                                }
+                            } else {
+                                // 前一个已经有回答，当前是单独的段永平回答
+                                const nextIndex = i + 1 < allMatches.length ? allMatches[i + 1].index : text.length;
+                                const aContent = text.substring(current.index + current.length, nextIndex).trim();
+                                qaPairs.push({ question: null, qContent: '', answer: current, aContent });
+                                i++;
+                            }
+                        } else {
+                            // 没有前一个配对，单独的段永平回答
+                            const nextIndex = i + 1 < allMatches.length ? allMatches[i + 1].index : text.length;
+                            const aContent = text.substring(current.index + current.length, nextIndex).trim();
+                            qaPairs.push({ question: null, qContent: '', answer: current, aContent });
+                            i++;
+                        }
+                    }
+                }
+
+                // 生成 HTML
+                let html = '';
+                for (const pair of qaPairs) {
+                    if (pair.question && pair.answer) {
+                        html += `<div class="qa-pair">
+                            <span class="qa-question-text">${pair.question.text}${pair.qContent}</span><br>
+                            <span class="qa-answer-text">${pair.answer.text}${pair.aContent}</span>
+                        </div>`;
+                    } else if (pair.question) {
+                        html += `<div class="qa-pair">
+                            <span class="qa-question-text">${pair.question.text}${pair.qContent}</span>
+                        </div>`;
+                    } else if (pair.answer) {
+                        html += `<div class="qa-pair">
+                            <span class="qa-answer-text">${pair.answer.text}${pair.aContent}</span>
+                        </div>`;
+                    }
+                }
+
+                return html || `<div class="qa-text">${text}</div>`;
+            }
+
+            list.innerHTML = visibleQuotes.map(q => {
+                const highlightText = (text, search) => {
+                    if (!search) return text;
+                    const regex = new RegExp(`(${search})`, 'gi');
+                    return text.replace(regex, '<mark>$1</mark>');
+                };
+
+                const quoteType = getQuoteType(q.text);
+                const typeIcon = quoteType === 'qa' ? '💬' : '📝';
+                const typeLabel = quoteType === 'qa' ? '问答' : '文章';
+
+                return `
+                    <div class="quote-item ${quoteType === 'qa' ? 'quote-qa' : 'quote-article'}">
+                        <div class="quote-type-badge">${typeIcon} ${typeLabel}</div>
+                        <div class="quote-text">${formatQAText(q.text)}</div>
+                        <div class="quote-meta">
+                            <span class="quote-source">${q.source || '未知来源'}</span>
+                            ${q.page ? `<span class="quote-page">第 ${q.page} 页</span>` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            const loadMoreBtn = document.querySelector('.quotes-load-more');
+            if (loadMoreBtn) {
+                loadMoreBtn.style.display = window.displayCount >= window.filteredQuotes.length ? 'none' : 'block';
+            }
+        }
+
+        function loadMoreQuotes() {
+            window.displayCount += 10;
+            renderQuotesList();
+        }
+
+        // ========== 返回列表 ==========
+        function showList() {
+            document.getElementById('companyList').style.display = 'block';
+            document.getElementById('companyDetail').style.display = 'none';
+        }
+
+        // ========== 筛选和搜索 ==========
+        function filterCompanies(filter) {
+            currentFilter = filter;
+            document.querySelectorAll('.filter-tabs .tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.onclick.toString().includes(`'${filter}'`)) {
+                    btn.classList.add('active');
+                }
+            });
+            renderCompanies();
+        }
+
+        function searchCompanies() {
+            currentSearch = document.getElementById('searchInput').value;
+            renderCompanies();
+        }
+
+        // ========== 初始化 ==========
+        document.addEventListener('DOMContentLoaded', function() {
+            // 更新分类统计
+            const counts = countByCategory();
+            document.getElementById('count-all').textContent = counts.all;
+            document.getElementById('count-stock').textContent = counts.stock;
+            document.getElementById('count-put').textContent = counts.put;
+            document.getElementById('count-watching').textContent = counts.watching;
+            document.getElementById('count-lesson').textContent = counts.lesson;
+
+            renderCompanies();
+        });
+    </script>
+
+    <style>
+        /* 持仓状态图例 */
+        .position-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 15px 0;
+            padding: 12px 15px;
+            background: var(--bg-light);
+            border-radius: 8px;
+            font-size: 0.85rem;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        /* 筛选区域 */
+        .filter-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+            margin: 20px 0;
+        }
+        .filter-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .filter-tabs .tab-btn {
+            padding: 8px 16px;
+            border: 2px solid var(--primary);
+            background: white;
+            color: var(--primary);
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        .filter-tabs .tab-btn:hover {
+            background: var(--bg-light);
+        }
+        .filter-tabs .tab-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+        .filter-tabs .tab-btn span {
+            font-size: 0.75rem;
+            opacity: 0.8;
+        }
+
+        /* 公司卡片 */
+        .company-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .company-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .company-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+        .company-card.has-detail {
+            border-color: var(--primary);
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+        .card-header h3 {
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            margin: 0;
+        }
+        .symbol {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin: 4px 0;
+        }
+        .card-meta {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin: 10px 0;
+        }
+        .quote-count {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+        .type-tag {
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            background: var(--bg-light);
+            border-radius: 4px;
+            color: var(--text-secondary);
+        }
+        .return-info {
+            font-size: 0.9rem;
+            color: var(--accent);
+            font-weight: 500;
+            margin-top: 8px;
+        }
+        .has-analysis {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px dashed var(--border);
+            font-size: 0.85rem;
+            color: var(--primary);
+        }
+
+        /* 持仓状态徽章 */
+        .position-badge {
+            padding: 4px 10px !important;
+            border-radius: 12px !important;
+            font-weight: 600 !important;
+            font-size: 0.75rem !important;
+            white-space: nowrap;
+        }
+
+        /* 投资过程时间线 */
+        .investment-process {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 20px 0;
+            padding: 20px;
+            background: var(--bg-light);
+            border-radius: 12px;
+        }
+        .process-step {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            flex: 1;
+            min-width: 200px;
+        }
+        .step-number {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.85rem;
+            flex-shrink: 0;
+        }
+        .step-content {
+            flex: 1;
+        }
+        .step-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+        .step-stage {
+            font-weight: bold;
+        }
+        .step-date {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            background: var(--bg-light);
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+        .step-desc {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+        .step-price {
+            font-size: 0.8rem;
+            color: var(--accent);
+            margin-top: 6px;
+            font-weight: 500;
+        }
+
+        /* 关键洞见 */
+        .insights-list {
+            list-style: none;
+            padding: 0;
+            margin: 15px 0;
+        }
+        .insights-list li {
+            padding: 12px 15px;
+            background: var(--bg-light);
+            margin: 8px 0;
+            border-radius: 6px;
+            border-left: 3px solid var(--accent);
+            font-size: 0.95rem;
+        }
+
+        /* 语录查看器样式 */
+        .quotes-section {
+            margin-top: 20px;
+        }
+        .quotes-toggle-btn {
+            width: 100%;
+            padding: 15px 20px;
+            background: linear-gradient(135deg, var(--bg-light) 0%, #edf2f7 100%);
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1rem;
+            transition: all 0.3s;
+            color: var(--primary);
+        }
+        .quotes-toggle-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+        .quotes-count {
+            font-weight: bold;
+        }
+        .quotes-icon {
+            font-size: 0.8rem;
+        }
+        .quotes-panel {
+            margin-top: 15px;
+            padding: 20px;
+            background: var(--bg-light);
+            border-radius: 8px;
+        }
+        .quotes-search {
+            margin-bottom: 15px;
+        }
+        .quotes-search input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.95rem;
+        }
+        .quotes-search input:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+        .quotes-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        .filter-btn {
+            padding: 6px 14px;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+        .filter-btn:hover {
+            border-color: var(--primary);
+        }
+        .filter-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        .quotes-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border);
+        }
+        .quotes-results-count {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        .quotes-sort {
+            padding: 6px 12px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .quotes-list {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .quote-item {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            border-left: 3px solid var(--accent);
+        }
+        .quote-item.quote-qa {
+            border-left-color: #3182ce;
+            background: linear-gradient(135deg, #fff 0%, #ebf8ff 100%);
+        }
+        .quote-item.quote-article {
+            border-left-color: #38a169;
+            background: linear-gradient(135deg, #fff 0%, #f0fff4 100%);
+        }
+        .quote-type-badge {
+            display: inline-block;
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        .quote-qa .quote-type-badge {
+            background: #3182ce;
+            color: white;
+        }
+        .quote-article .quote-type-badge {
+            background: #38a169;
+            color: white;
+        }
+
+        /* 问答格式 */
+        .quote-text .qa-pair {
+            margin-bottom: 12px;
+            line-height: 1.7;
+        }
+        .quote-text .qa-question-text {
+            display: block;
+            color: #e53e3e;
+            font-weight: 500;
+            padding: 10px 12px;
+            background: #fff5f5;
+            border-left: 3px solid #e53e3e;
+            border-radius: 4px 4px 0 0;
+        }
+        .quote-text .qa-answer-text {
+            display: block;
+            color: #2b6cb0;
+            font-weight: 500;
+            padding: 10px 12px;
+            background: #ebf8ff;
+            border-left: 3px solid #2b6cb0;
+            border-radius: 0 0 4px 4px;
+        }
+        .quote-text .qa-context {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            padding: 4px 0;
+        }
+        .quote-text {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+        .quote-text mark {
+            background: #fff3cd;
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+        .quote-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+        .quotes-load-more {
+            width: 100%;
+            padding: 12px;
+            margin-top: 15px;
+            background: white;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .quotes-load-more:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+        }
+
+        /* 类型筛选样式 */
+        .quotes-sources {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed var(--border);
+        }
+        .quotes-sources .filter-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-right: 10px;
+        }
+        .quotes-sources .filter-btn {
+            padding: 4px 10px;
+            font-size: 0.8rem;
+        }
+
+        /* 法律声明样式 */
+        .legal-notice {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-top: 1px solid #dee2e6;
+            margin-top: 40px;
+            padding: 20px 0;
+        }
+        .legal-notice .notice-box {
+            background: white;
+            border-radius: 8px;
+            padding: 15px 20px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+        }
+        .legal-notice h4 {
+            color: #adb5bd;
+            font-size: 0.8rem;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e9ecef;
+            font-weight: normal;
+        }
+        .legal-notice .notice-content p {
+            font-size: 0.7rem;
+            line-height: 1.6;
+            color: #adb5bd;
+            margin-bottom: 8px;
+        }
+        .legal-notice .notice-content p:last-child {
+            margin-bottom: 0;
+        }
+        .legal-notice .disclaimer {
+            background: #fffbeb;
+            color: #a78b4a;
+            padding: 10px 12px;
+            border-radius: 4px;
+            border-left: 3px solid #f59e0b;
+        }
+        .legal-notice .disclaimer strong {
+            color: #a78b4a;
+        }
+    </style>
+</body>
+</html>

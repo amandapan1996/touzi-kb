@@ -1,0 +1,1378 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>经典语录 - 段永平投资知识库</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>段永平投资知识库</h1>
+            <p class="subtitle">投资大佬思维框架 | 多维度索引</p>
+        </div>
+    </header>
+
+    <nav>
+        <div class="container">
+            <a href="index.html">首页</a>
+            <a href="cases.html">公司点评与案例</a>
+            <a href="quotes.html" class="active">经典语录</a>
+            <a href="framework.html">决策框架</a>
+            <a href="puts.html">Put交易</a>
+        </div>
+    </nav>
+
+    <main class="container">
+        <a href="index.html" class="back-link">← 返回首页</a>
+
+        <section>
+            <h2>经典语录</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                从书籍、博客、帖子中精选的段永平语录，涵盖投资理念、商业智慧与人生哲学。
+            </p>
+
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="搜索语录..." onkeyup="filterQuotes()">
+            </div>
+
+            <!-- 关键词索引标签云 -->
+            <div class="keyword-cloud">
+                <div class="cloud-header">
+                    <span class="cloud-title">关键词索引</span>
+                    <button class="cloud-toggle" onclick="toggleCloud()">收起 ↑</button>
+                </div>
+                <div class="cloud-tags" id="keywordCloud">
+                    <button class="keyword-tag active" data-topic="all" onclick="filterByTopic('all', this)">全部</button>
+                    <button class="keyword-tag" data-topic="投资理念" onclick="filterByTopic('投资理念', this)">投资理念</button>
+                    <button class="keyword-tag" data-topic="能力圈" onclick="filterByTopic('能力圈', this)">能力圈</button>
+                    <button class="keyword-tag" data-topic="平常心" onclick="filterByTopic('平常心', this)">平常心</button>
+                    <button class="keyword-tag" data-topic="本分" onclick="filterByTopic('本分', this)">本分</button>
+                    <button class="keyword-tag" data-topic="风险控制" onclick="filterByTopic('风险控制', this)">风险控制</button>
+                    <button class="keyword-tag" data-topic="护城河" onclick="filterByTopic('护城河', this)">护城河</button>
+                    <button class="keyword-tag" data-topic="安全边际" onclick="filterByTopic('安全边际', this)">安全边际</button>
+                    <button class="keyword-tag" data-topic="估值" onclick="filterByTopic('估值', this)">估值</button>
+                    <button class="keyword-tag" data-topic="商业模式" onclick="filterByTopic('商业模式', this)">商业模式</button>
+                    <button class="keyword-tag" data-topic="企业文化" onclick="filterByTopic('企业文化', this)">企业文化</button>
+                    <button class="keyword-tag" data-topic="消费者导向" onclick="filterByTopic('消费者导向', this)">消费者导向</button>
+                    <button class="keyword-tag" data-topic="利润之上" onclick="filterByTopic('利润之上', this)">利润之上</button>
+                    <button class="keyword-tag" data-topic="诚信正直" onclick="filterByTopic('诚信正直', this)">诚信正直</button>
+                    <button class="keyword-tag" data-topic="专注" onclick="filterByTopic('专注', this)">专注</button>
+                    <button class="keyword-tag" data-topic="差异化" onclick="filterByTopic('差异化', this)">差异化</button>
+                    <button class="keyword-tag" data-topic="Stop Doing" onclick="filterByTopic('Stop Doing', this)">Stop Doing</button>
+                    <button class="keyword-tag" data-topic="止损" onclick="filterByTopic('止损', this)">止损</button>
+                    <button class="keyword-tag" data-topic="持仓管理" onclick="filterByTopic('持仓管理', this)">持仓管理</button>
+                    <button class="keyword-tag" data-topic="定价权" onclick="filterByTopic('定价权', this)">定价权</button>
+                    <button class="keyword-tag" data-topic="聚焦" onclick="filterByTopic('聚焦', this)">聚焦</button>
+                    <button class="keyword-tag" data-topic="学习成长" onclick="filterByTopic('学习成长', this)">学习成长</button>
+                    <button class="keyword-tag" data-topic="人生智慧" onclick="filterByTopic('人生智慧', this)">人生智慧</button>
+                    <button class="keyword-tag" data-topic="巴菲特" onclick="filterByTopic('巴菲特', this)">巴菲特</button>
+                    <button class="keyword-tag" data-topic="做空" onclick="filterByTopic('做空', this)">做空</button>
+                    <button class="keyword-tag" data-topic="营销" onclick="filterByTopic('营销', this)">营销</button>
+                    <button class="keyword-tag" data-topic="定价" onclick="filterByTopic('定价', this)">定价</button>
+                    <button class="keyword-tag" data-topic="授权" onclick="filterByTopic('授权', this)">授权</button>
+                    <button class="keyword-tag" data-topic="CEO" onclick="filterByTopic('CEO', this)">CEO</button>
+                </div>
+            </div>
+
+            <!-- 筛选统计 -->
+            <div class="filter-stats">
+                <span id="currentTopic">全部</span>
+                <span id="quoteCount">共 0 条语录</span>
+            </div>
+
+            <div class="quote-grid" id="quoteGrid">
+                <!-- 语录卡片将通过JavaScript动态生成 -->
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>段永平投资知识库 | 基于 Karpathy llm-wiki 方法论构建</p>
+            <p class="small">最后更新：2026-04-16</p>
+        </div>
+    </footer>
+
+    <script>
+        // 扩充后的语录数据库
+        const quotes = [
+            // ========== 投资理念 ==========
+            {
+                text: "我理解的投资归纳起来就是：买股票就是买公司，买公司就是买公司的未来现金流折现，句号！",
+                source: "投资逻辑篇",
+                topics: ["投资理念"]
+            },
+            {
+                text: "做对的事情，把事情做对！",
+                source: "投资逻辑篇",
+                topics: ["投资理念"]
+            },
+            {
+                text: "投资就是买未来现金流。所谓能看懂公司就是能看懂其未来现金流。",
+                source: "投资逻辑篇",
+                topics: ["投资理念", "能力圈"]
+            },
+            {
+                text: "买股票的时候要先看风险，再看回报。",
+                source: "投资逻辑篇",
+                topics: ["投资理念", "风险控制"]
+            },
+            {
+                text: "投资没有捷径，只有慢慢学习。",
+                source: "博客文章",
+                topics: ["投资理念", "学习成长"]
+            },
+            {
+                text: "看十年比看一年容易，看五年比看十年容易。",
+                source: "雪球问答",
+                topics: ["投资理念"]
+            },
+            {
+                text: "买股票就是买公司，买公司就是买未来现金流折现。",
+                source: "投资逻辑篇",
+                topics: ["投资理念"]
+            },
+            {
+                text: "我不对的地方就是平时不太研究宏观，也不觉得宏观有多重要。",
+                source: "雪球问答",
+                topics: ["投资理念"]
+            },
+            {
+                text: "忽略市场影响，看懂商业模式和企业文化，尽量想明白10年后企业会是个什么样子。",
+                source: "博客文章",
+                topics: ["投资理念", "企业文化", "商业模式"]
+            },
+            {
+                text: "最危险的事情是用错误的方式赚钱。",
+                source: "博客文章",
+                topics: ["投资理念", "风险控制"]
+            },
+            {
+                text: "我不太关心宏观，但会关注对我投资的公司有影响的因素。",
+                source: "雪球问答",
+                topics: ["投资理念"]
+            },
+            {
+                text: "所有的高手都是敢为天下后的，只是做的比别人更好。",
+                source: "商业逻辑篇",
+                topics: ["投资理念", "敢为天下后"]
+            },
+            {
+                text: "“一直在努力”就一定有利润？先要做对的事情，努力才有用。",
+                source: "博客文章",
+                topics: ["投资理念"]
+            },
+            {
+                text: "如果股市马上停止10年交易，你是否能接受？买股票要这样想。",
+                source: "博客文章",
+                topics: ["投资理念"]
+            },
+            {
+                text: "我投资只是为了好玩，所以一般只关心有自己喜欢的产品的公司。",
+                source: "雪球问答",
+                topics: ["投资理念", "消费者导向"]
+            },
+            {
+                text: "用折扣价买入好公司。",
+                source: "投资逻辑篇",
+                topics: ["投资理念", "安全边际"]
+            },
+            {
+                text: "不管什么时候，企业都是最重要的。",
+                source: "雪球问答",
+                topics: ["投资理念"]
+            },
+
+            // ========== 能力圈 ==========
+            {
+                text: "不懂的东西不要碰。看不懂的公司就放在一边，等看懂了再说。",
+                source: "投资逻辑篇",
+                topics: ["能力圈"]
+            },
+            {
+                text: "知道自己的能力圈有多大往往比自己能力圈有多大要重要的多！",
+                source: "投资逻辑篇",
+                topics: ["能力圈"]
+            },
+            {
+                text: "不要轻易去'扩大'自己的能力圈。搞懂一个生意往往是需要很多年的。",
+                source: "投资逻辑篇",
+                topics: ["能力圈"]
+            },
+            {
+                text: "别人恐慌的时候我也不会买，除非我看懂了这个公司。",
+                source: "雪球问答",
+                topics: ["能力圈", "平常心"]
+            },
+            {
+                text: "前提是要真正理解，要在自己的能力圈范围里。",
+                source: "雪球帖子",
+                topics: ["能力圈"]
+            },
+            {
+                text: "没看明白的公司就放一边，等看明白了再说。",
+                source: "投资逻辑篇",
+                topics: ["能力圈"]
+            },
+            {
+                text: "如果放到今天来看，我大概不会买GE，而是应该那个时候就买苹果。因为回过头来想，我对GE的理解并不是很透，但苹果却是我能真的理解的公司。",
+                source: "雪球问答",
+                topics: ["能力圈"]
+            },
+            {
+                text: "Margin of safety 实际上应该指的是能力圈而不仅仅是价格。",
+                source: "投资逻辑篇",
+                topics: ["能力圈", "安全边际"]
+            },
+            {
+                text: "投资的标准很简单：商业模式，企业文化，合理价钱。",
+                source: "雪球问答",
+                topics: ["能力圈", "商业模式", "企业文化"]
+            },
+            {
+                text: "我一般会先了解企业文化，如果觉得不信任这家公司，就连报表都不会看的。",
+                source: "博客文章",
+                topics: ["能力圈", "企业文化"]
+            },
+            {
+                text: "先看商业模式，再看价格。",
+                source: "博客文章",
+                topics: ["能力圈", "商业模式"]
+            },
+
+            // ========== 平常心 ==========
+            {
+                text: "平常心就是理性，就是不做傻事。",
+                source: "雪球问答",
+                topics: ["平常心"]
+            },
+            {
+                text: "我用三年不用的钱投资，所以不着急。",
+                source: "雪球问答",
+                topics: ["平常心", "风险控制"]
+            },
+            {
+                text: "慢慢变富挺好的。",
+                source: "博客文章",
+                topics: ["平常心"]
+            },
+            {
+                text: "我从来没想过要赚快钱。",
+                source: "雪球问答",
+                topics: ["平常心"]
+            },
+            {
+                text: "买入的逻辑没变，股价越低越应该高兴。",
+                source: "雪球问答",
+                topics: ["平常心"]
+            },
+            {
+                text: "股市掉这么点儿就这样了？平常人是很难有平常心的，所以平常心又叫不平常心。",
+                source: "雪球问答",
+                topics: ["平常心"]
+            },
+            {
+                text: "如果你关心的不是事物的本质，没有平常心是正常的。",
+                source: "雪球问答",
+                topics: ["平常心"]
+            },
+            {
+                text: "在错的道路上是没办法有平常心的，比如用着margin的人们。",
+                source: "雪球问答",
+                topics: ["平常心", "风险控制"]
+            },
+            {
+                text: "能坚持下来确实非常不容易，苹果也是几十年后才有今天的。",
+                source: "雪球问答",
+                topics: ["平常心", "专注"]
+            },
+            {
+                text: "平常心看，每一次买卖其实都是独立的。",
+                source: "雪球问答",
+                topics: ["平常心"]
+            },
+            {
+                text: "慢慢来，不着急。",
+                source: "博客文章",
+                topics: ["平常心"]
+            },
+            {
+                text: "用平常心去考虑买卖的问题，买卖的时候多想想自己标的的价值定义，尽量忽略市场价格的影响。",
+                source: "雪球问答",
+                topics: ["平常心"]
+            },
+            {
+                text: "对贸易战我没什么看法，或者说有也不说。从投资的角度讲，找到好公司比啥都重要。眼前这些事10年后都不是事。",
+                source: "雪球问答",
+                topics: ["平常心", "投资理念"]
+            },
+
+            // ========== 本分 ==========
+            {
+                text: "本分就是做该做的事，不该做的事坚决不做。",
+                source: "商业逻辑篇",
+                topics: ["本分"]
+            },
+            {
+                text: "本分的人不会去占别人的便宜，这是最基本的逻辑。",
+                source: "商业逻辑篇",
+                topics: ["本分"]
+            },
+            {
+                text: "所谓本分就是在什么情况下该做什么样的事情。",
+                source: "商业逻辑篇",
+                topics: ["本分"]
+            },
+            {
+                text: "我们公司有句话叫'本分'，本分的意思就是不做不该做的事。",
+                source: "商业逻辑篇",
+                topics: ["本分"]
+            },
+            {
+                text: "如果没有'取之有道'的约束，利润导向很容易不择手段。国内现在这个问题实际上非常严重。",
+                source: "商业逻辑篇",
+                topics: ["本分", "诚信正直"]
+            },
+            {
+                text: "做本分的事情其实也是明哲保身的好办法。",
+                source: "博客文章",
+                topics: ["本分", "人生智慧"]
+            },
+            {
+                text: "本分是要有代价的，能为了一个目标去'牺牲'。",
+                source: "商业逻辑篇",
+                topics: ["本分"]
+            },
+
+            // ========== 风险控制 ==========
+            {
+                text: "不亏钱比赚钱更重要。",
+                source: "博客文章",
+                topics: ["风险控制"]
+            },
+            {
+                text: "老巴的教导千万别忘了：不做空，不借钱，不做不懂的东西！",
+                source: "投资逻辑篇",
+                topics: ["风险控制", "巴菲特"]
+            },
+            {
+                text: "做空是愚蠢的！",
+                source: "投资逻辑篇",
+                topics: ["风险控制", "做空"]
+            },
+            {
+                text: "宁可错过，不能做错。",
+                source: "雪球问答",
+                topics: ["风险控制"]
+            },
+            {
+                text: "最危险的事情是用错误的方式赚钱。",
+                source: "博客文章",
+                topics: ["风险控制"]
+            },
+            {
+                text: "万科相对而言还是比较健康的，但似乎对营业额的增长也很有追求。我一般喜欢那些追求好产品，不太提营业额目标的公司。",
+                source: "雪球问答",
+                topics: ["风险控制", "专注"]
+            },
+            {
+                text: "很多公司为了发展快些而去负债，结果某一天因为负债而陷入麻烦。",
+                source: "雪球问答",
+                topics: ["风险控制"]
+            },
+            {
+                text: "负债高的时候往往是最危险的时候。",
+                source: "投资逻辑篇",
+                topics: ["风险控制"]
+            },
+            {
+                text: "我一般喜欢那些现金超过负债的公司。",
+                source: "雪球问答",
+                topics: ["风险控制"]
+            },
+
+            // ========== 护城河 ==========
+            {
+                text: "好的生意模式往往具有很宽的护城河。",
+                source: "投资逻辑篇",
+                topics: ["护城河", "商业模式"]
+            },
+            {
+                text: "护城河实际上我觉得是生意模式中的一部分。",
+                source: "投资逻辑篇",
+                topics: ["护城河", "商业模式"]
+            },
+            {
+                text: "差异化其实是护城河的核心。",
+                source: "商业逻辑篇",
+                topics: ["护城河", "差异化"]
+            },
+            {
+                text: "产品的差异化是护城河最本质的部分。",
+                source: "商业逻辑篇",
+                topics: ["护城河", "差异化"]
+            },
+            {
+                text: "企业文化可以看着是护城河的一部分。",
+                source: "商业逻辑篇",
+                topics: ["护城河", "企业文化"]
+            },
+            {
+                text: "能做出别人做不出的东西就是差异化，就是护城河。",
+                source: "商业逻辑篇",
+                topics: ["护城河", "差异化"]
+            },
+            {
+                text: "护城河就是竞争优势，竞争优势可以用长期毛利率来体现。",
+                source: "投资逻辑篇",
+                topics: ["护城河", "商业模式"]
+            },
+
+            // ========== 安全边际 ==========
+            {
+                text: "投资最重要的东西就是要有安全边际。",
+                source: "投资逻辑篇",
+                topics: ["安全边际"]
+            },
+            {
+                text: "Margin of safety 实际上应该指的是能力圈而不仅仅是价格。",
+                source: "投资逻辑篇",
+                topics: ["安全边际", "能力圈"]
+            },
+            {
+                text: "用折扣价买入好公司。",
+                source: "投资逻辑篇",
+                topics: ["安全边际"]
+            },
+            {
+                text: "PE低不一定便宜，PE高不一定贵。关键看未来现金流。",
+                source: "雪球问答",
+                topics: ["估值"]
+            },
+            {
+                text: "估值是艺术，不是科学。毛估估就够了。",
+                source: "雪球问答",
+                topics: ["估值"]
+            },
+            {
+                text: "价值不变的情况下，价格越低越买，当然对咯。",
+                source: "雪球问答",
+                topics: ["估值", "安全边际"]
+            },
+
+            // ========== 估值 ==========
+            {
+                text: "估值是艺术，不是科学。毛估估就够了。",
+                source: "雪球问答",
+                topics: ["估值"]
+            },
+            {
+                text: "PE低不一定便宜，PE高不一定贵。关键看未来现金流。",
+                source: "雪球问答",
+                topics: ["估值"]
+            },
+            {
+                text: "市值是别人愿意出多少钱买这家公司的意思。愿意出多少钱买这家公司完全取决于你自己的机会成本。",
+                source: "雪球问答",
+                topics: ["估值"]
+            },
+            {
+                text: "对不了解的公司，我一般会先看PE。PE这东西、毛估估就好了。",
+                source: "投资逻辑篇",
+                topics: ["估值"]
+            },
+            {
+                text: "其实都是瞎猜的。生意模式好，企业文化好，基本上你就可以简单地希望他们会正常增长，所以给个五年十年的，有增长不奇怪啊。",
+                source: "雪球问答",
+                topics: ["估值", "商业模式", "企业文化"]
+            },
+            {
+                text: "买股票和成本无关，要理性思考。",
+                source: "雪球问答",
+                topics: ["估值", "平常心"]
+            },
+            {
+                text: "如果一个公司被你研究了很久，终于看懂了，那就没什么好担心的了。",
+                source: "博客文章",
+                topics: ["估值", "能力圈"]
+            },
+
+            // ========== 商业模式 ==========
+            {
+                text: "好的生意模式往往具有很宽的护城河。",
+                source: "投资逻辑篇",
+                topics: ["商业模式", "护城河"]
+            },
+            {
+                text: "生意模式就是赚钱的方式。好的生意模式就是能持续赚很多钱的方式。",
+                source: "投资逻辑篇",
+                topics: ["商业模式"]
+            },
+            {
+                text: "好的商业模式就是有护城河的、有差异化的事业模式。",
+                source: "投资逻辑篇",
+                topics: ["商业模式", "护城河", "差异化"]
+            },
+            {
+                text: "苹果最厉害的就是在苹果的企业文化下建立的生态系统，这是个非常强大得商业模式。",
+                source: "雪球问答",
+                topics: ["商业模式", "企业文化"]
+            },
+            {
+                text: "差异化越小的产品越容易陷入价格战。",
+                source: "商业逻辑篇",
+                topics: ["商业模式", "差异化", "定价权"]
+            },
+            {
+                text: "竞争的本质在于产品差异化，要做别人提供不了的东西。没有差异化，就成了日用基础商品，只能靠价格来竞争，很难挣钱。",
+                source: "商业逻辑篇",
+                topics: ["商业模式", "差异化"]
+            },
+            {
+                text: "好公司体现在毛利率上，好公司能赚钱。",
+                source: "投资逻辑篇",
+                topics: ["商业模式"]
+            },
+            {
+                text: "好的商业模式要有定价权。",
+                source: "投资逻辑篇",
+                topics: ["商业模式", "定价权"]
+            },
+
+            // ========== 企业文化 ==========
+            {
+                text: "正直和诚信--integrity。这是所有great企业的共性，也是出问题的企业的最大\"漏斗\"。",
+                source: "博客文章",
+                topics: ["企业文化", "诚信正直"]
+            },
+            {
+                text: "好的企业文化会帮公司找到好的CEO，好的CEO在有强大企业文化的公司里能发挥的作用更大。",
+                source: "商业逻辑篇",
+                topics: ["企业文化", "CEO"]
+            },
+            {
+                text: "好的企业文化可以为好的商业模式保驾护航，甚至可以帮助发现好的商业模式。",
+                source: "雪球问答",
+                topics: ["企业文化", "商业模式"]
+            },
+            {
+                text: "所谓企业文化讲的就是什么是对的事情（或者说哪些是不对的事情），以及如何把对的事情做对。",
+                source: "博客文章",
+                topics: ["企业文化"]
+            },
+            {
+                text: "没有好的企业文化就很难有好的董事会，没有好的董事会将来的CEO人选出问题的概率就会大很多。",
+                source: "商业逻辑篇",
+                topics: ["企业文化", "CEO"]
+            },
+            {
+                text: "所谓好的企业文化是能管到制度管不过来的东西，不是个神秘的咒语。",
+                source: "商业逻辑篇",
+                topics: ["企业文化"]
+            },
+            {
+                text: "企业文化是护城河的一部分。",
+                source: "投资逻辑篇",
+                topics: ["企业文化", "护城河"]
+            },
+            {
+                text: "苹果的董事会似乎不错，所以以后应该也会不错。",
+                source: "雪球问答",
+                topics: ["企业文化", "CEO"]
+            },
+            {
+                text: "不好的公司文化时间长了一定会伤害到企业自己，而且不好的企业文化一旦建立就很难去掉了。",
+                source: "雪球问答",
+                topics: ["企业文化"]
+            },
+            {
+                text: "穷举很难，大致可以说让企业不健康不长久的文化都不是好文化。",
+                source: "雪球问答",
+                topics: ["企业文化"]
+            },
+            {
+                text: "凡事是以利益为准绳的，我就不太喜欢。",
+                source: "雪球问答",
+                topics: ["企业文化", "诚信正直"]
+            },
+            {
+                text: "用拟人化的角度去想一家公司。我不想打交道的人我也不想投资他们的公司。",
+                source: "雪球问答",
+                topics: ["企业文化"]
+            },
+            {
+                text: "当年去松下时，中村社长说\"我总在想如果松下老人站在我背后，他会怎么想这件事\"。我马上心里就想，松下要有麻烦了。",
+                source: "商业逻辑篇",
+                topics: ["企业文化"]
+            },
+            {
+                text: "苹果的企业文化20年内大概都不太会变。",
+                source: "雪球问答",
+                topics: ["企业文化"]
+            },
+            {
+                text: "文化建立起来大概需要很长时间，但破坏起来非常容易。",
+                source: "商业逻辑篇",
+                topics: ["企业文化"]
+            },
+
+            // ========== 消费者导向 ==========
+            {
+                text: "苹果是非常难见到的能够长期focus在\"做对的事情\"的企业。",
+                source: "商业逻辑篇",
+                topics: ["消费者导向", "专注"]
+            },
+            {
+                text: "伟大的公司应该是具有\"消费者导向\"的文化并且能做出\"伟大产品\"的公司。",
+                source: "雪球问答",
+                topics: ["消费者导向"]
+            },
+            {
+                text: "我们追求的就是改善用户体验，做出最好的产品，其他的都是水到渠成的事情。",
+                source: "博客文章",
+                topics: ["消费者导向"]
+            },
+            {
+                text: "我们总是说，量不重要，利润不重要，最重要的是要找到消费者的真实需求并想法满足。",
+                source: "博客文章",
+                topics: ["消费者导向"]
+            },
+            {
+                text: "谁更专注，谁就更有机会。",
+                source: "商业逻辑篇",
+                topics: ["专注"]
+            },
+            {
+                text: "专注于用户体验的企业总是会走得远一些的。",
+                source: "雪球问答",
+                topics: ["消费者导向", "专注"]
+            },
+            {
+                text: "我们公司一直focus在用户身上。",
+                source: "商业逻辑篇",
+                topics: ["消费者导向"]
+            },
+            {
+                text: "苹果就是努力把自己的产品做好，然后卖一个合适的价钱而已。",
+                source: "雪球问答",
+                topics: ["消费者导向", "定价"]
+            },
+            {
+                text: "知道消费者想要什么是一件非常困难的事，没听说市场调研可以解决这个问题。",
+                source: "雪球问答",
+                topics: ["消费者导向"]
+            },
+            {
+                text: "诺基亚不是用户导向的，你看到的这个现象其实是他们的内在文化的外在表现。",
+                source: "雪球问答",
+                topics: ["消费者导向", "企业文化"]
+            },
+
+            // ========== 利润之上 ==========
+            {
+                text: "利润之上的追求的意思不是利润至上，意思正好相反。",
+                source: "雪球问答",
+                topics: ["利润之上"]
+            },
+            {
+                text: "苹果是一家有利润之上追求的公司。真正有这种追求的公司非常少。",
+                source: "雪球问答",
+                topics: ["利润之上"]
+            },
+            {
+                text: "他说苹果在发起环保倡议、保护员工安全和其他政策时也是如此。———这就叫利润之上的追求！",
+                source: "博客文章",
+                topics: ["利润之上"]
+            },
+            {
+                text: "有\"利润之上\"追求的企业成为好企业的概率要比一般企业大很多，时间越长差别越大。",
+                source: "商业逻辑篇",
+                topics: ["利润之上"]
+            },
+            {
+                text: "其实真正好的能持续经营的企业大多都不是着眼于利润的，利润不过是水到渠成的结果而已。",
+                source: "商业逻辑篇",
+                topics: ["利润之上"]
+            },
+            {
+                text: "有\"利润之上\"追求则更容易看到事物的本质。",
+                source: "商业逻辑篇",
+                topics: ["利润之上"]
+            },
+            {
+                text: "理想主义和现实主义结合。单纯的理想主义走不远，单纯的现实主义做不大。",
+                source: "商业逻辑篇",
+                topics: ["利润之上"]
+            },
+
+            // ========== 诚信正直 ==========
+            {
+                text: "正直和诚信--integrity。这是所有great企业的共性，也是出问题的企业的最大\"漏斗\"。",
+                source: "博客文章",
+                topics: ["诚信正直"]
+            },
+            {
+                text: "信誉不是讲讲而已，只有需要付出代价的时候，才知道谁是讲（守）信誉的。",
+                source: "博客文章",
+                topics: ["诚信正直", "本分"]
+            },
+            {
+                text: "所谓\"讲信誉\"或叫诚信或本分都是在需要付出代价的时候才能体现出来。",
+                source: "博客文章",
+                topics: ["诚信正直", "本分"]
+            },
+            {
+                text: "凡事是以利益为准绳的，我就太不喜欢了。",
+                source: "雪球问答",
+                topics: ["诚信正直"]
+            },
+            {
+                text: "本分的人不会去占别人的便宜，这是最基本的逻辑。",
+                source: "商业逻辑篇",
+                topics: ["诚信正直", "本分"]
+            },
+            {
+                text: "没有\"取之有道\"的约束，利润导向很容易不择手段。",
+                source: "商业逻辑篇",
+                topics: ["诚信正直"]
+            },
+
+            // ========== 专注 ==========
+            {
+                text: "谁更专注，谁就更有机会。",
+                source: "商业逻辑篇",
+                topics: ["专注"]
+            },
+            {
+                text: "苹果focus在自己做的事情上。苹果文化的强度很强，有严格的\"Stop Doing List\"。",
+                source: "商业逻辑篇",
+                topics: ["专注", "Stop Doing"]
+            },
+            {
+                text: "所谓\"性价比\"其实就是为性能不够好找借口，我也是花了很多年才突然想明白的。",
+                source: "博客文章",
+                topics: ["专注", "差异化"]
+            },
+            {
+                text: "我觉得看书可能不如看企业来的明白。",
+                source: "雪球问答",
+                topics: ["专注", "学习成长"]
+            },
+            {
+                text: "我们公司属于知道要追求少品种的，所以相对同行多数来说品种确实要少。",
+                source: "商业逻辑篇",
+                topics: ["专注"]
+            },
+            {
+                text: "聚焦的意思就是集中优势兵力打歼灭战。",
+                source: "商业逻辑篇",
+                topics: ["专注", "聚焦"]
+            },
+            {
+                text: "做少一点，做精一点。",
+                source: "商业逻辑篇",
+                topics: ["专注", "聚焦"]
+            },
+            {
+                text: "做得越多，赚得越少，所以聚焦很重要。",
+                source: "雪球问答",
+                topics: ["专注", "聚焦"]
+            },
+            {
+                text: "OPPO和vivo的产品确实专注在做好东西上。",
+                source: "商业逻辑篇",
+                topics: ["专注"]
+            },
+            {
+                text: "我们不说要做第一，但要到前三。实际上做第几不重要，最重要是出好产品。",
+                source: "商业逻辑篇",
+                topics: ["专注", "聚焦"]
+            },
+
+            // ========== 差异化 ==========
+            {
+                text: "简单讲，没有差异化的产品是很难长期赚到大钱的。",
+                source: "博客文章",
+                topics: ["差异化"]
+            },
+            {
+                text: "差异化其实就是用户需要但其他竞争对手满足不了的东西。",
+                source: "博客文章",
+                topics: ["差异化", "消费者导向"]
+            },
+            {
+                text: "产品没有差异化，最后看到的就是价格战。",
+                source: "商业逻辑篇",
+                topics: ["差异化", "定价权"]
+            },
+            {
+                text: "差异化越小的产品越容易陷入价格战。价格战会导致大家份额不变的情况下价格下来了。",
+                source: "商业逻辑篇",
+                topics: ["差异化", "定价权"]
+            },
+            {
+                text: "对企业家而言，差异化应该是最重要的。",
+                source: "投资逻辑篇",
+                topics: ["差异化"]
+            },
+            {
+                text: "价格战一般在产品差异化很小时容易发生。",
+                source: "商业逻辑篇",
+                topics: ["差异化", "定价权"]
+            },
+            {
+                text: "差异化好的产品一般都是在长期积累厚积薄发出来的。",
+                source: "商业逻辑篇",
+                topics: ["差异化", "专注"]
+            },
+            {
+                text: "苹果用一个品种就做到了消费者导向，这里面功夫差很多啊。",
+                source: "商业逻辑篇",
+                topics: ["差异化", "消费者导向", "专注"]
+            },
+
+            // ========== Stop Doing ==========
+            {
+                text: "做对的事情实际上是通过不做不对的事情来实现的。",
+                source: "博客文章",
+                topics: ["Stop Doing"]
+            },
+            {
+                text: "每个人都应该有自己的stop doing list。",
+                source: "博客文章",
+                topics: ["Stop Doing"]
+            },
+            {
+                text: "学巴菲特最重要和人们能够学的东西其实是他不做什么！",
+                source: "投资逻辑篇",
+                topics: ["Stop Doing", "巴菲特"]
+            },
+            {
+                text: "其实每个人都多少知道自己能做什么，但往往不知道自己不该做什么。",
+                source: "投资逻辑篇",
+                topics: ["Stop Doing"]
+            },
+            {
+                text: "我们公司有个\"Stop Doing List\"。比如我们不做代工。",
+                source: "商业逻辑篇",
+                topics: ["Stop Doing"]
+            },
+            {
+                text: "发现错了就改，越早改代价越小。",
+                source: "博客文章",
+                topics: ["Stop Doing", "止损"]
+            },
+            {
+                text: "一旦发现是不正确的事情，就要马上停止，不管多大的代价往往都会是最小的代价。",
+                source: "投资逻辑篇",
+                topics: ["Stop Doing", "止损"]
+            },
+            {
+                text: "Stop doing list就是所谓的不为清单。",
+                source: "商业逻辑篇",
+                topics: ["Stop Doing"]
+            },
+            {
+                text: "我们\"不做的事情\"是一个非常长的表，每一个不做的事情都是有背后的故事和道理的。",
+                source: "博客文章",
+                topics: ["Stop Doing"]
+            },
+            {
+                text: "产品角度，是慢慢摸索出来的，发现不对，赶紧停。",
+                source: "商业逻辑篇",
+                topics: ["Stop Doing"]
+            },
+            {
+                text: "要有时间想。可能会想很久，有一天突然灵光一现，想明白是错的/对的。",
+                source: "商业逻辑篇",
+                topics: ["Stop Doing", "学习成长"]
+            },
+
+            // ========== 止损 ==========
+            {
+                text: "一旦发现是不正确的事情，就要马上停止，不管多大的代价往往都会是最小的代价。",
+                source: "投资逻辑篇",
+                topics: ["止损"]
+            },
+            {
+                text: "发现错了就改，越早改代价越小。",
+                source: "博客文章",
+                topics: ["止损"]
+            },
+            {
+                text: "做空是愚蠢的！",
+                source: "投资逻辑篇",
+                topics: ["止损", "做空"]
+            },
+            {
+                text: "失去平常心就会做蠢事。",
+                source: "博客文章",
+                topics: ["止损", "平常心"]
+            },
+
+            // ========== 持仓管理 ==========
+            {
+                text: "我发现我买的公司涨的时候我都卖的有点早。",
+                source: "雪球问答",
+                topics: ["持仓管理"]
+            },
+            {
+                text: "我一般持有3-5家公司，都是我很懂的。",
+                source: "雪球问答",
+                topics: ["持仓管理", "能力圈"]
+            },
+            {
+                text: "大概很少有人在涨了100倍依然不动心的，所以最关键的还是平常心去看基本面，忘记成本，忽略市场。",
+                source: "雪球问答",
+                topics: ["持仓管理", "平常心"]
+            },
+            {
+                text: "卖股票和持股成本无关，要理性思考。",
+                source: "雪球问答",
+                topics: ["持仓管理"]
+            },
+            {
+                text: "用人民币买了不少港股。ADR每年要交管理费，不如在中国香港买。",
+                source: "雪球帖子",
+                topics: ["持仓管理"]
+            },
+            {
+                text: "不要因为一只股票涨了很多就把它卖掉。",
+                source: "雪球问答",
+                topics: ["持仓管理"]
+            },
+
+            // ========== 定价权 ==========
+            {
+                text: "消费类电子行业竞争这么激烈，为什么苹果的产品却有定价权呢？",
+                source: "雪球问答",
+                topics: ["定价权", "差异化"]
+            },
+            {
+                text: "好的商业模式要有定价权。",
+                source: "投资逻辑篇",
+                topics: ["定价权", "商业模式"]
+            },
+            {
+                text: "定价很简单，就是你给客户带来的价值的一部分，所以跟客户和价值都有关。",
+                source: "雪球问答",
+                topics: ["定价权", "消费者导向"]
+            },
+            {
+                text: "对企业家而言，差异化应该是最重要的，有了差异化再谈定价。",
+                source: "投资逻辑篇",
+                topics: ["定价权", "差异化"]
+            },
+            {
+                text: "对企业而言降价就有点像核武器，能不用就别用，最后对谁都没好处。",
+                source: "商业逻辑篇",
+                topics: ["定价权", "差异化"]
+            },
+
+            // ========== 聚焦 ==========
+            {
+                text: "聚焦的意思就是集中优势兵力打歼灭战。",
+                source: "商业逻辑篇",
+                topics: ["聚焦"]
+            },
+            {
+                text: "我一向是反对多元化的，我们现在的情况不是多元化，应称为行业的专业化和产品的多样化。",
+                source: "商业逻辑篇",
+                topics: ["聚焦", "商业模式"]
+            },
+            {
+                text: "如果我们判断进不了前三名的行业，我们就不进入。",
+                source: "商业逻辑篇",
+                topics: ["聚焦"]
+            },
+            {
+                text: "做少一点，做精一点。做得越多，赚得越少，所以聚焦很重要。",
+                source: "商业逻辑篇",
+                topics: ["聚焦", "专注"]
+            },
+            {
+                text: "苹果的发布会几乎每次都有让人叹为观止的东西，这是因为他们一直聚焦在几款产品上。",
+                source: "商业逻辑篇",
+                topics: ["聚焦", "专注"]
+            },
+
+            // ========== 学习成长 ==========
+            {
+                text: "投资没有捷径，只有慢慢学习。",
+                source: "博客文章",
+                topics: ["学习成长"]
+            },
+            {
+                text: "把事情做对确实有高低之分。每个人都有自己的学习曲线，每个人都不可能不犯错误。",
+                source: "商业逻辑篇",
+                topics: ["学习成长"]
+            },
+            {
+                text: "据说在任何方面花够一万个小时后，大多数人都能成为专家。",
+                source: "商业逻辑篇",
+                topics: ["学习成长"]
+            },
+            {
+                text: "想学就可以，只要努力看远一点就好。",
+                source: "雪球问答",
+                topics: ["学习成长"]
+            },
+            {
+                text: "学巴菲特最重要和人们能够学的东西其实是他不做什么！",
+                source: "投资逻辑篇",
+                topics: ["学习成长", "巴菲特"]
+            },
+            {
+                text: "我觉得看书可能不如看企业来的明白。书可以看《基业长青》，企业可以看苹果这些年的产品发布会。",
+                source: "雪球问答",
+                topics: ["学习成长"]
+            },
+            {
+                text: "看书或者看企业能帮助你理解很多东西。",
+                source: "博客文章",
+                topics: ["学习成长"]
+            },
+            {
+                text: "我第一次看《基业长青》时有很兴奋的感觉，很多年的体会和心得都被人写出来了。",
+                source: "商业逻辑篇",
+                topics: ["学习成长"]
+            },
+
+            // ========== 人生智慧 ==========
+            {
+                text: "平常心就是理性，就是不做傻事。",
+                source: "雪球问答",
+                topics: ["人生智慧", "平常心"]
+            },
+            {
+                text: "慢就是快。",
+                source: "博客文章",
+                strategy: ["人生智慧"]
+            },
+            {
+                text: "我觉得做企业最大的对手是自己。",
+                source: "商业逻辑篇",
+                topics: ["人生智慧"]
+            },
+            {
+                text: "如果知道自己会死在哪里，那就永远不要去那里。",
+                source: "博客文章",
+                topics: ["人生智慧"]
+            },
+            {
+                text: "知道自己不能做什么比知道自己能做什么更重要。",
+                source: "博客文章",
+                topics: ["人生智慧"]
+            },
+            {
+                text: "做对的事情，把事情做对。",
+                source: "博客文章",
+                topics: ["人生智慧"]
+            },
+            {
+                text: "think different就是和而不同。",
+                source: "商业逻辑篇",
+                topics: ["人生智慧"]
+            },
+            {
+                text: "其实你并不需要每年都翻番。",
+                source: "博客文章",
+                topics: ["人生智慧", "平常心"]
+            },
+            {
+                text: "知道自己能力圈多大往往比能力圈有多大要重要的多。",
+                source: "投资逻辑篇",
+                topics: ["人生智慧", "能力圈"]
+            },
+
+            // ========== 巴菲特 ==========
+            {
+                text: "老巴的教导千万别忘了：不做空，不借钱，不做不懂的东西！",
+                source: "投资逻辑篇",
+                topics: ["巴菲特", "风险控制"]
+            },
+            {
+                text: "学巴菲特最重要和人们能够学的东西其实是他不做什么！",
+                source: "投资逻辑篇",
+                topics: ["巴菲特"]
+            },
+            {
+                text: "我理解的\"宗教\"大概就是信仰的意思，就是说心里有些must believe的东西。我的宗教态度确实和老巴一样。",
+                source: "投资逻辑篇",
+                topics: ["巴菲特"]
+            },
+            {
+                text: "我们信仰巴菲特对投资的理解---\"买股票就是买公司\"。",
+                source: "投资逻辑篇",
+                topics: ["巴菲特", "投资理念"]
+            },
+            {
+                text: "买股票就是买公司\"这句话会说的人非常多，但我几乎没见过真的骨子里真的理解并相信这句话的。",
+                source: "投资逻辑篇",
+                topics: ["巴菲特", "投资理念"]
+            },
+            {
+                text: "我和巴菲特吃过饭后，对巴菲特更加理解了。",
+                source: "博客文章",
+                topics: ["巴菲特"]
+            },
+            {
+                text: "巴菲特说过，他有很多很厉害的朋友最后都破产了，原因就是因为用了margin，所以不能用margin等等。",
+                source: "投资逻辑篇",
+                topics: ["巴菲特", "风险控制"]
+            },
+
+            // ========== 做空 ==========
+            {
+                text: "做空是愚蠢的！",
+                source: "投资逻辑篇",
+                topics: ["做空"]
+            },
+            {
+                text: "做空风险无限，代价惨重。",
+                source: "博客文章",
+                topics: ["做空"]
+            },
+            {
+                text: "老巴的教导千万别忘了：不做空！",
+                source: "投资逻辑篇",
+                topics: ["做空", "巴菲特"]
+            },
+            {
+                text: "失去平常心就会做蠢事，做空就是典型的失去平常心的例子。",
+                source: "博客文章",
+                topics: ["做空", "平常心"]
+            },
+
+            // ========== 营销 ==========
+            {
+                text: "广告是效率导向的，就是把产品本身用尽可能高的效率传达给你的目标消费群。",
+                source: "商业逻辑篇",
+                topics: ["营销"]
+            },
+            {
+                text: "最不好的广告就是夸大其词的广告，靠这种广告的公司最后都不会有好下场。",
+                source: "商业逻辑篇",
+                topics: ["营销"]
+            },
+            {
+                text: "关键是产品！营销远没有你想的那么重要。",
+                source: "雪球问答",
+                topics: ["营销", "消费者导向"]
+            },
+            {
+                text: "好的产品本身会说话。",
+                source: "商业逻辑篇",
+                topics: ["营销", "消费者导向"]
+            },
+            {
+                text: "好货不便宜啊。",
+                source: "博客文章",
+                topics: ["营销", "定价"]
+            },
+
+            // ========== 定价 ==========
+            {
+                text: "定价很简单，就是你给客户带来的价值的一部分。",
+                source: "雪球问答",
+                topics: ["定价", "消费者导向"]
+            },
+            {
+                text: "做市场调研，在上市的时候就尽可能定准价，错了及时调整。",
+                source: "商业逻辑篇",
+                topics: ["定价"]
+            },
+            {
+                text: "好货不便宜。追求\"性价比\"的公司恐怕是既没有长长的坡也更没有厚厚的雪的。",
+                source: "博客文章",
+                topics: ["定价", "差异化"]
+            },
+            {
+                text: "苹果就是努力把自己的产品做好，然后卖一个合适的价钱而已。",
+                source: "雪球问答",
+                topics: ["定价", "消费者导向"]
+            },
+            {
+                text: "我同意苹果产品是高性价比的。高性价比的东西不等于便宜，该知道的人最后都会知道的。",
+                source: "雪球问答",
+                topics: ["定价"]
+            },
+
+            // ========== 授权 ==========
+            {
+                text: "关于授权的问题，能比我理解得更好或做的更好的人确实不多。授权的过程一般是: 指示、指导、协商、授权、放权。",
+                source: "商业逻辑篇",
+                topics: ["授权", "CEO"]
+            },
+            {
+                text: "never out of control（只有好的文化才有可能做到这一点）。",
+                source: "商业逻辑篇",
+                topics: ["授权", "企业文化"]
+            },
+            {
+                text: "凡是员工见到领导就战战兢兢的公司，时间长了都会出问题的。",
+                source: "商业逻辑篇",
+                topics: ["授权", "企业文化"]
+            },
+            {
+                text: "董事会的作用是不让做不对的事，不应该建议什么。",
+                source: "商业逻辑篇",
+                topics: ["授权", "CEO"]
+            },
+
+            // ========== CEO ==========
+            {
+                text: "好的企业文化会帮公司找到好的CEO。",
+                source: "投资逻辑篇",
+                topics: ["CEO", "企业文化"]
+            },
+            {
+                text: "苹果启用Tim Cook绝对是Jobs的最大\"发明\"，有了Tim Cook，苹果的文化至少可以向前延伸50年。",
+                source: "雪球问答",
+                topics: ["CEO", "企业文化"]
+            },
+            {
+                text: "CEO最重要的品质是诚信。",
+                source: "投资逻辑篇",
+                topics: ["CEO"]
+            },
+            {
+                text: "从5年10年的角度看，CEO至关重要。",
+                source: "商业逻辑篇",
+                topics: ["CEO"]
+            },
+            {
+                text: "空降兵的成功率非常低。由于文化冲突的问题，空降兵的成功率非常低。",
+                source: "商业逻辑篇",
+                topics: ["CEO", "企业文化"]
+            },
+            {
+                text: "强大的企业文化会帮公司找到好的CEO。",
+                source: "雪球问答",
+                topics: ["CEO", "企业文化"]
+            },
+            {
+                text: "我觉得一个好的CEO最重要的品质是诚信。",
+                source: "投资逻辑篇",
+                topics: ["CEO"]
+            },
+            {
+                text: "当年我对苹果开始有兴趣后，几乎看了苹果所有的发布会以及能找到的Tim Cook和乔布斯讲过的东西。",
+                source: "雪球问答",
+                topics: ["CEO"]
+            },
+
+            // ========== 敢为天下后 ==========
+            {
+                text: "所有的高手都是敢为天下后的，只是做的比别人更好。",
+                source: "商业逻辑篇",
+                topics: ["敢为天下后"]
+            },
+            {
+                text: "\"敢为天下后\"就是指产品类别，是因为你猜市场的需求往往很难，但是别人已经把需求明确了，你去满足这个需求，就更确定。",
+                source: "商业逻辑篇",
+                topics: ["敢为天下后"]
+            },
+            {
+                text: "没有创新的天下后肯定死定了。",
+                source: "商业逻辑篇",
+                topics: ["敢为天下后"]
+            },
+            {
+                text: "苹果也算是敢为天下后的典范了。",
+                source: "雪球问答",
+                topics: ["敢为天下后", "苹果"]
+            },
+        ];
+
+        let currentFilter = 'all';
+        let cloudCollapsed = false;
+
+        // 切换标签云显示
+        function toggleCloud() {
+            const cloud = document.getElementById('keywordCloud');
+            const toggleBtn = document.querySelector('.cloud-toggle');
+            cloudCollapsed = !cloudCollapsed;
+
+            if (cloudCollapsed) {
+                cloud.style.display = 'none';
+                toggleBtn.textContent = '展开 ↓';
+            } else {
+                cloud.style.display = 'flex';
+                toggleBtn.textContent = '收起 ↑';
+            }
+        }
+
+        // 按主题过滤
+        function filterByTopic(topic, btn) {
+            currentFilter = topic;
+
+            // 更新标签状态
+            document.querySelectorAll('.keyword-tag').forEach(t => t.classList.remove('active'));
+            if (btn) {
+                btn.classList.add('active');
+            } else {
+                document.querySelector(`[data-topic="${topic}"]`)?.classList.add('active');
+            }
+
+            // 更新统计
+            document.getElementById('currentTopic').textContent = topic === 'all' ? '全部' : topic;
+
+            renderQuotes(topic, document.getElementById('searchInput').value);
+        }
+
+        // 生成语录卡片
+        function renderQuotes(filter = 'all', search = '') {
+            const grid = document.getElementById('quoteGrid');
+
+            let filtered = quotes;
+
+            // 按主题过滤
+            if (filter !== 'all') {
+                filtered = filtered.filter(q => q.topics.includes(filter));
+            }
+
+            // 搜索过滤
+            if (search) {
+                filtered = filtered.filter(q =>
+                    q.text.toLowerCase().includes(search.toLowerCase())
+                );
+            }
+
+            // 更新计数
+            document.getElementById('quoteCount').textContent = `共 ${filtered.length} 条语录`;
+
+            if (filtered.length === 0) {
+                grid.innerHTML = '<div class="no-results">没有找到匹配的语录</div>';
+                return;
+            }
+
+            grid.innerHTML = filtered.map((quote, idx) => `
+                <div class="quote-card" style="animation-delay: ${idx * 50}ms">
+                    <p class="text">${quote.text}</p>
+                    <div class="quote-footer">
+                        <p class="source">—— ${quote.source}</p>
+                        <div class="topics">
+                            ${quote.topics.map(t => `<span class="tag">${t}</span>`).join('')}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 搜索
+        function filterQuotes() {
+            const search = document.getElementById('searchInput').value;
+            renderQuotes(currentFilter, search);
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            renderQuotes();
+            document.getElementById('quoteCount').textContent = `共 ${quotes.length} 条语录`;
+        });
+    </script>
+</body>
+</html>
