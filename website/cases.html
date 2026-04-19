@@ -19,7 +19,6 @@
         <div class="container">
             <a href="index.html">首页</a>
             <a href="cases.html" class="active">公司点评与案例</a>
-            <a href="topics.html">主题分类</a>
             <a href="quotes.html">经典语录</a>
             <a href="framework.html">决策框架</a>
             <a href="puts.html">Put交易</a>
@@ -93,6 +92,18 @@
         <div class="container">
             <p>段永平投资知识库 | 基于 Karpathy llm-wiki 方法论构建</p>
             <p class="small">最后更新：2026-04-15</p>
+        </div>
+        <div class="legal-notice">
+            <div class="container">
+                <div class="notice-box">
+                    <h4>法律声明</h4>
+                    <div class="notice-content">
+                        <p><strong>版权说明：</strong>本网站所引用内容（包括但不限于段永平先生的投资语录、商业观点、问答回复等）均整理自公开出版物，包括《段永平投资问答录（投资逻辑篇）》《段永平投资问答录（商业逻辑篇）》及段永平先生的博客、雪球发言等公开渠道。上述内容版权归相应原作者/出版方所有，本网站仅用于学习交流目的，如有侵权请联系删除。</p>
+                        <p><strong>免责声明：</strong>本网站内容仅供学习、研究和交流参考之用，不构成任何投资建议。投资有风险，入市需谨慎。本网站不对任何投资者依据本网站内容所作出的投资决策及可能产生的投资结果承担任何责任。任何人因使用本网站信息而直接或间接导致的任何损失，本网站概不负责。</p>
+                        <p class="disclaimer"><strong>⚠️ 重要提示：</strong>本页面内容不涉及且不构成任何投资建议。投资者应独立思考、自担风险。</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </footer>
 
@@ -324,6 +335,62 @@
         }
 
         // ========== 公司详情 ==========
+
+        // 公司关键词配置 - 用于过滤相关语录
+        const companyKeywords = {
+            '苹果': ['苹果', 'iPhone', 'iPad', 'Mac', '乔布斯', '库克', 'Apple'],
+            '网易': ['网易', '游戏', '丁磊', '魔兽', 'NetEase'],
+            '腾讯控股': ['腾讯', '微信', 'QQ', '马化腾', '社交'],
+            '贵州茅台': ['茅台', '飞天', '酱香', '白酒', '茅台酒'],
+            '阿里巴巴': ['阿里', '淘宝', '天猫', '马云', '阿里巴巴', '支付宝'],
+            '雅虎': ['雅虎', 'Yahoo', '杨致远'],
+            '百度': ['百度', '李彦宏', '搜索引擎', '竞价'],
+            '谷歌': ['谷歌', 'Google', '安卓', 'Alphabet'],
+            '通用电气': ['GE', '通用电气', '韦尔奇', '伊梅尔特'],
+            '雅虎日本': ['雅虎日本', 'Yahoo Japan'],
+            '阿里巴巴集团': ['阿里', '淘宝', '天猫', '马云', '阿里巴巴', '支付宝'],
+            '拼多多': ['拼多多', '黄峥', '社交电商', '多多'],
+            '腾讯音乐': ['腾讯音乐', 'QQ音乐', '酷狗', '酷我', '网易云音乐'],
+            'Zoom': ['Zoom', '视频会议', '远程办公', '袁征'],
+            '迪士尼': ['迪士尼', 'Disney', '漫威', '皮克斯'],
+            '特斯拉': ['特斯拉', 'Tesla', '马斯克', '电动车', '新能源'],
+            '台积电': ['台积电', 'TSMC', '半导体', '芯片制造'],
+            '英特尔': ['英特尔', 'Intel', '芯片', 'CPU', '摩尔'],
+            '百度': ['百度', '李彦宏', '搜索引擎']
+        };
+
+        // 检查语录是否与公司相关
+        function isQuoteRelevant(quoteText, companyName) {
+            const keywords = companyKeywords[companyName] || [companyName];
+            const text = quoteText.toLowerCase();
+
+            // 检查是否包含关键词
+            const hasKeyword = keywords.some(kw =>
+                text.includes(kw.toLowerCase())
+            );
+
+            // 如果没有关键词，检查是否是一般性投资讨论（保留）
+            // 这类语录通常在问答中出现，提问者问的是关于这个公司的问题
+            const generalKeywords = ['投资', '股票', '公司', '生意', '商业模式', '护城河', '本分', '平常心'];
+            const hasGeneral = generalKeywords.some(kw => text.includes(kw));
+
+            // 黑名单 - 明确是其他公司的语录
+            const blackList = [];
+            for (const [otherCompany, otherKeywords] of Object.entries(companyKeywords)) {
+                if (otherCompany !== companyName) {
+                    if (otherKeywords.some(kw => text.includes(kw.toLowerCase()))) {
+                        // 如果包含其他公司关键词，且不包含本公司关键词，可能是其他公司的
+                        if (!hasKeyword) {
+                            return false;
+                        }
+                    }
+                }
+            }
+
+            // 如果包含本公司关键词，或者是一般性讨论，保留
+            return hasKeyword || hasGeneral;
+        }
+
         function showCompanyDetail(name) {
             const company = companyData[name];
             if (!company) return;
@@ -334,7 +401,10 @@
             const position = getPositionStatus(company);
             const config = positionConfig[position] || positionConfig['watching'];
             const hasAnalysis = caseAnalysisData[name];
-            const quotes = company.quotes || [];
+            const allQuotes = company.quotes || [];
+
+            // 过滤出与公司相关的语录
+            const quotes = allQuotes.filter(q => isQuoteRelevant(q.text, name));
 
             let detailHtml = `
                 <div class="case-header">
@@ -345,7 +415,7 @@
                         </span>
                         <span>类型：${company.type || '未分类'}</span>
                         <span>投资状态：${company.returnInfo || '未明确'}</span>
-                        <span>语录：${company.quoteCount || 0}条</span>
+                        <span>相关语录：${quotes.length}条</span>
                     </div>
                 </div>
 
@@ -545,6 +615,198 @@
                     `显示 ${visibleQuotes.length} / ${window.filteredQuotes.length} 条`;
             }
 
+            // 过滤段永平介绍性文字
+            function filterIntro(text) {
+                // 简介模式：段永平后面的介绍性文字，包含多个头衔/成就
+                const introPatterns = [
+                    /段永平[：:]\s*著名[人生企业家]/g,
+                    /段永平[：:]\s*同时也是?著名[投资人企业]/g,
+                    /段永平[：:]\s*不管[是作]/g,
+                    /段永平[：:]\s*本期[雪球]/g,
+                    /段永平[：:]\s*著名[企业家投资人]/g,
+                    /段永平[：:]\s*[小创][a-zA-Z\u4e00-\u9fa5]+品牌[a-zA-Z\u4e00-\u9fa5]+/g,
+                ];
+
+                // 匹配 "段永平：xxx。" 格式的简介（xxx是对段永平的介绍）
+                // 通常简介包含 "企业家"、"创始人"、"投资人" 等关键词
+                const fullIntroPattern = /段永平[：:]([^。\n]*(?:著名|创始人|投资人|企业家|品牌)[^。\n]*(?:\。|$))/g;
+
+                let result = text;
+                let match;
+
+                // 移除整句简介 "段永平：xxx。" 格式
+                while ((match = fullIntroPattern.exec(text)) !== null) {
+                    const introText = match[1];
+                    // 如果简介较短（少于100字），认为是介绍性文字
+                    if (introText.length < 150) {
+                        result = result.replace(match[0], '段永平：');
+                    }
+                }
+
+                // 清理多余的冒号
+                result = result.replace(/段永平[：:]\s*[：:]/g, '段永平：');
+                // 移除仅有冒号后面是空白的情况
+                result = result.replace(/段永平[：:]\s*$/gm, '');
+
+                return result;
+            }
+
+            // 格式化问答语录 - 确保网友问题在段永平回答之前
+            function formatQAText(text) {
+                // 先过滤简介
+                text = filterIntro(text);
+
+                // 收集所有问答片段
+                const allMatches = [];
+                let match;
+
+                // 找网友问题 - 支持多种格式：
+                // "01.网友："、"网友："、"问："、"网友xxx："
+                const qPattern = /((?:\d+[\.、]?\s*)?(?:网友[^：:]*?|问)[：:])/g;
+                while ((match = qPattern.exec(text)) !== null) {
+                    allMatches.push({
+                        index: match.index,
+                        type: 'question',
+                        text: match[0],
+                        length: match[0].length
+                    });
+                }
+
+                // 找段永平回答
+                const aPattern = /段永平[：:]/g;
+                while ((match = aPattern.exec(text)) !== null) {
+                    allMatches.push({
+                        index: match.index,
+                        type: 'answer',
+                        text: match[0],
+                        length: match[0].length
+                    });
+                }
+
+                // 如果没有任何问答标记，返回原文
+                if (allMatches.length === 0) {
+                    return `<div class="qa-text">${text}</div>`;
+                }
+
+                // 按位置排序
+                allMatches.sort((a, b) => a.index - b.index);
+
+                // 重新配对：确保格式是「网友问 → 段永平答」
+                // 如果原始顺序是「段永平→网友」，需要交换
+                const qaPairs = [];
+                let i = 0;
+
+                while (i < allMatches.length) {
+                    const current = allMatches[i];
+
+                    if (current.type === 'question') {
+                        // 这是网友问题
+                        // 找下一个段永平回答
+                        const nextAnswerIdx = allMatches.findIndex((m, idx) => idx > i && m.type === 'answer');
+                        let qContent = text.substring(current.index + current.length,
+                            nextAnswerIdx !== -1 ? allMatches[nextAnswerIdx].index : text.length).trim();
+
+                        if (nextAnswerIdx !== -1) {
+                            // 有对应的段永平回答
+                            const answer = allMatches[nextAnswerIdx];
+                            const afterAnswerIdx = nextAnswerIdx + 1 < allMatches.length ? allMatches[nextAnswerIdx + 1].index : text.length;
+                            const aContent = text.substring(answer.index + answer.length, afterAnswerIdx).trim();
+                            qaPairs.push({ question: current, qContent, answer, aContent });
+                            i = nextAnswerIdx + 1;
+                        } else {
+                            // 只有问题，没有段永平回答
+                            qaPairs.push({ question: current, qContent, answer: null, aContent: '' });
+                            i++;
+                        }
+                    } else {
+                        // 这是段永平回答
+                        // 检查前一个配对是否已经有回答
+                        if (qaPairs.length > 0) {
+                            const lastPair = qaPairs[qaPairs.length - 1];
+                            if (lastPair.answer === null) {
+                                // 前一个网友问题没有回答，当前段永平就是它的回答
+                                // 检查这是否是「段永平→网友」的错位情况
+                                if (lastPair.question && current.index < lastPair.question.index) {
+                                    // 这是「段永平在前」的情况
+                                    // 段永平的内容是回答，02.网友是新的问题
+                                    const betweenText = text.substring(
+                                        current.index + current.length,
+                                        lastPair.question.index
+                                    ).trim();
+                                    // 把段永平的内容当作回答，02.网友当作问题
+                                    lastPair.answer = current;
+                                    lastPair.aContent = current.text + betweenText + (lastPair.qContent || '');
+                                    lastPair.qContent = '';
+                                    // 保留02.网友的问题内容作为下一个
+                                    const nextIndex = lastPair.question.index + lastPair.question.length;
+                                    const nextContent = text.substring(nextIndex,
+                                        allMatches[i + 1] ? allMatches[i + 1].index : text.length).trim();
+                                    // 当前段永平的回答已经用完，需要找下一个段永平
+                                    const nextAnswerIdx = allMatches.findIndex((m, idx) => idx > i && m.type === 'answer');
+                                    if (nextAnswerIdx !== -1) {
+                                        const nextAnswer = allMatches[nextAnswerIdx];
+                                        const nextAContent = text.substring(
+                                            nextAnswer.index + nextAnswer.length,
+                                            allMatches[nextAnswerIdx + 1] ? allMatches[nextAnswerIdx + 1].index : text.length
+                                        ).trim();
+                                        qaPairs.push({
+                                            question: lastPair.question,
+                                            qContent: betweenText + lastPair.question.text + nextContent,
+                                            answer: nextAnswer,
+                                            aContent: nextAnswer.text + nextAContent
+                                        });
+                                        // 删除原来的那个（已合并）
+                                        qaPairs.shift();
+                                        i = nextAnswerIdx + 1;
+                                    } else {
+                                        i++;
+                                    }
+                                } else {
+                                    // 正常情况：网友问题在前，段永平在后
+                                    lastPair.answer = current;
+                                    const nextIndex = i + 1 < allMatches.length ? allMatches[i + 1].index : text.length;
+                                    lastPair.aContent = current.text + text.substring(current.index + current.length, nextIndex).trim();
+                                    i++;
+                                }
+                            } else {
+                                // 前一个已经有回答，当前是单独的段永平回答
+                                const nextIndex = i + 1 < allMatches.length ? allMatches[i + 1].index : text.length;
+                                const aContent = text.substring(current.index + current.length, nextIndex).trim();
+                                qaPairs.push({ question: null, qContent: '', answer: current, aContent });
+                                i++;
+                            }
+                        } else {
+                            // 没有前一个配对，单独的段永平回答
+                            const nextIndex = i + 1 < allMatches.length ? allMatches[i + 1].index : text.length;
+                            const aContent = text.substring(current.index + current.length, nextIndex).trim();
+                            qaPairs.push({ question: null, qContent: '', answer: current, aContent });
+                            i++;
+                        }
+                    }
+                }
+
+                // 生成 HTML
+                let html = '';
+                for (const pair of qaPairs) {
+                    if (pair.question && pair.answer) {
+                        html += `<div class="qa-pair">
+                            <span class="qa-question-text">${pair.question.text}${pair.qContent}</span><br>
+                            <span class="qa-answer-text">${pair.answer.text}${pair.aContent}</span>
+                        </div>`;
+                    } else if (pair.question) {
+                        html += `<div class="qa-pair">
+                            <span class="qa-question-text">${pair.question.text}${pair.qContent}</span>
+                        </div>`;
+                    } else if (pair.answer) {
+                        html += `<div class="qa-pair">
+                            <span class="qa-answer-text">${pair.answer.text}${pair.aContent}</span>
+                        </div>`;
+                    }
+                }
+
+                return html || `<div class="qa-text">${text}</div>`;
+            }
+
             list.innerHTML = visibleQuotes.map(q => {
                 const highlightText = (text, search) => {
                     if (!search) return text;
@@ -559,7 +821,7 @@
                 return `
                     <div class="quote-item ${quoteType === 'qa' ? 'quote-qa' : 'quote-article'}">
                         <div class="quote-type-badge">${typeIcon} ${typeLabel}</div>
-                        <div class="quote-text">${highlightText(q.text, window.currentQuoteSearch)}</div>
+                        <div class="quote-text">${formatQAText(q.text)}</div>
                         <div class="quote-meta">
                             <span class="quote-source">${q.source || '未知来源'}</span>
                             ${q.page ? `<span class="quote-page">第 ${q.page} 页</span>` : ''}
@@ -950,6 +1212,35 @@
             background: #38a169;
             color: white;
         }
+
+        /* 问答格式 */
+        .quote-text .qa-pair {
+            margin-bottom: 12px;
+            line-height: 1.7;
+        }
+        .quote-text .qa-question-text {
+            display: block;
+            color: #e53e3e;
+            font-weight: 500;
+            padding: 10px 12px;
+            background: #fff5f5;
+            border-left: 3px solid #e53e3e;
+            border-radius: 4px 4px 0 0;
+        }
+        .quote-text .qa-answer-text {
+            display: block;
+            color: #2b6cb0;
+            font-weight: 500;
+            padding: 10px 12px;
+            background: #ebf8ff;
+            border-left: 3px solid #2b6cb0;
+            border-radius: 0 0 4px 4px;
+        }
+        .quote-text .qa-context {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            padding: 4px 0;
+        }
         .quote-text {
             font-size: 0.95rem;
             line-height: 1.6;
@@ -1003,6 +1294,47 @@
         .quotes-sources .filter-btn {
             padding: 4px 10px;
             font-size: 0.8rem;
+        }
+
+        /* 法律声明样式 */
+        .legal-notice {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-top: 1px solid #dee2e6;
+            margin-top: 40px;
+            padding: 20px 0;
+        }
+        .legal-notice .notice-box {
+            background: white;
+            border-radius: 8px;
+            padding: 15px 20px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+        }
+        .legal-notice h4 {
+            color: #adb5bd;
+            font-size: 0.8rem;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e9ecef;
+            font-weight: normal;
+        }
+        .legal-notice .notice-content p {
+            font-size: 0.7rem;
+            line-height: 1.6;
+            color: #adb5bd;
+            margin-bottom: 8px;
+        }
+        .legal-notice .notice-content p:last-child {
+            margin-bottom: 0;
+        }
+        .legal-notice .disclaimer {
+            background: #fffbeb;
+            color: #a78b4a;
+            padding: 10px 12px;
+            border-radius: 4px;
+            border-left: 3px solid #f59e0b;
+        }
+        .legal-notice .disclaimer strong {
+            color: #a78b4a;
         }
     </style>
 </body>
