@@ -25,7 +25,7 @@ jobs:
 
       - name: Sync to public repo
         env:
-          GH_TOKEN: ${{ secrets.SYNC_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cd public_site
 
@@ -39,4 +39,4 @@ jobs:
           git commit -m "Sync website files"
 
           # 使用 Token 推送到公开仓库
-          git push https://$GH_TOKEN@github.com/amandapan1996/touzi-kb.git HEAD:main --force
+          git push https://x-access-token:$GH_TOKEN@github.com/amandapan1996/touzi-kb.git HEAD:main --force
