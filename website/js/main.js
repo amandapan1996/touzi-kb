@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', function() {
 async function loadData() {
     try {
         // 从分析结果加载
-        const response = await fetch('../wiki/structured/analysis.json');
+        const response = await fetch('data/analysis.json');
         const data = await response.json();
 
         // 转换公司数据
