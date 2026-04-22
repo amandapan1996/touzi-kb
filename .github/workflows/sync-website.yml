@@ -1,0 +1,40 @@
+name: Sync Website to Public Repo
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Extract website files
+        run: |
+          mkdir -p public_site
+          # 复制首页和共享资源
+          cp index.html public_site/
+          cp -r css js public_site/
+
+          # 复制各大佬知识库
+          cp -r munger qingze duanyongping taleb buffett dalio public_site/
+
+      - name: Sync to public repo
+        env:
+          GH_TOKEN: ${{ secrets.SYNC_TOKEN }}
+        run: |
+          cd public_site
+          git init
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add -A
+          git commit -m "Sync website files"
+          git push https://$GH_TOKEN@github.com/amandapan1996/touzi-kb.git HEAD:main --force
